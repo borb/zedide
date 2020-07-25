@@ -1,0 +1,22 @@
+{
+  "name": "web-z80-ide",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "an ide for writing, running and debugging z80 asm on the web",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com:borb/web-z80-ide.git"
+  },
+  "author": "rob andrews <rob@aphlor.org>",
+  "license": "CC-BY-SA-4.0",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {
+    "codemirror": "^5.56.0"
+  }
+}
