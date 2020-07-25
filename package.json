@@ -19,5 +19,8 @@
   "dependencies": {
     "codemirror": "^5.56.0",
     "webpack": "^4.44.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.12"
   }
 }
