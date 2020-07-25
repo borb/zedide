@@ -1,11 +1,11 @@
 {
   "name": "web-z80-ide",
   "version": "0.0.1",
-  "type": "module",
   "description": "an ide for writing, running and debugging z80 asm on the web",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
