@@ -2,8 +2,44 @@
 <html lang="en">
 	<head>
 		<title>editor prototype</title>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+			div.editor {
+				margin: 0;
+				padding: 5px 5px 5px 5px;
+				box-sizing: border-box;
+				border: 1px solid red;
+				height: 100%;
+				width: 80%;
+				float: left;
+			}
+			div.toolkit {
+				margin: 0;
+				padding: 5px 5px 5px 5px;
+				box-sizing: border-box;
+				height: 100%;
+				width: 20%;
+				float: right;
+				border: 1px solid blue;
+			}
+		</style>
 	</head>
 	<body>
+		<div class="editor">
+			<textarea id="code-editor">
+	.org $2000
+	ld a, $00
+loop:
+	ld ($ffff), a
+	inc a
+	jp loop</textarea>
+		</div>
+		<div class="toolkit">
+			<p>tools here</p>
+		</div>
 		<script src="/js/frontend.bundle.js"></script>
 	</body>
 </html>
