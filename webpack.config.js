@@ -17,5 +17,11 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       }
     ]
+  },
+  devServer: {
+    contentBase: path.resolve(__dirname, 'public/'),
+    publicPath: '/js/',
+    compress: true,
+    port: 3000
   }
 }
