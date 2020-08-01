@@ -1,7 +1,8 @@
 import CodeMirror from 'codemirror'
 
 /**
- * z80 code hinting for codemirror 5/
+ * z80 code hinting for codemirror 5.
+ * rob andrews <rob@aphlor.org>
  *
  * thanks to the opcode table at https://clrhome.org/table/
  */
