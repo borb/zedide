@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>editor prototype</title>
+		<title>web-z80-ide prototype</title>
 		<style>
 			body {
 				margin: 0;
@@ -25,6 +25,17 @@
 				float: right;
 				border: 1px solid blue;
 			}
+			div.output-messages {
+				margin: 0;
+				padding: 5px 5px 5px 5px;
+				width: 100%;
+				border: 1px solid green;
+				clear: both;
+			}
+			.CodeMirror {
+				font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+				font-size: 18px;
+			}
 		</style>
 	</head>
 	<body>
@@ -40,7 +51,12 @@ loop:
 		</div>
 		<div class="toolkit">
 			<p>tools here</p>
+			<p>
+				<button id="assemble" onclick="document.assemble()">Assemble</button>
+				<button id="save" onclick="document.save()">Save</button>
+			</p>
 		</div>
+		<div id="output-messages" class="output-messages"></div>
 		<script src="/js/frontend.bundle.js"></script>
 	</body>
 </html>

@@ -21,12 +21,26 @@ const codeMirror = CodeMirror.fromTextArea(
 )
 
 const doCompile = (source) => {
-  let vxx = ASM.compile(source, Monolith.Z80)
-  console.log(vxx)
-  let hex = ASM.hex(vxx[0])
-  return hextools.hex2bin(hex, 0, Math.pow(2, 16) - 1)
+  let [error, build, symbols] = ASM.compile(source, Monolith.Z80)
+  if (error === null) {
+    let hex = ASM.hex(build[0])
+    return hextools.hex2bin(hex, 0, Math.pow(2, 16) - 1)
+  }
+  // an error during compilation
+  console.log(error)
+  document.getElementById('output-messages').innerHTML = `
+    <p>Build failed.</p>
+    <pre>${error.msg} (at line ${error.s.numline}, '${error.s.line}')</pre>
+  `
+  return false
 }
 
 // push this into the document object so we can access it outside of scope
 document.codeMirror = codeMirror
 document.doCompile = doCompile
+document.assemble = () => {
+  let output = document.doCompile(document.codeMirror.getValue())
+  if (output !== false) {
+    document.getElementById('output-messages').innerHTML = '<p>Build succeeded.</p>'
+  }
+}
