@@ -194,3 +194,5 @@ class ProcessorZ80
   {
   }
 }
+
+export default ProcessorZ80
