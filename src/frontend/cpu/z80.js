@@ -1,17 +1,33 @@
+/**
+ * Z80 CPU simulator for javascript
+ *
+ * thanks to bitwise ops in javascript, many features of simulating a z80 cpu are made simple.
+ * this includes handling 8- and 16-bit over/underflow, signs, etc.
+ *
+ * rob andrews <rob@aphlor.org>
+ */
 class ProcessorZ80
 {
   // cpu registers
   #registers = {
+    // program counter
     pc: 0x0000,
+    // stack pointer
     sp: 0x0000,
-    af: 0x0000,
-    af2: 0x0000,
+    // accumulator
+    a: 0x00,
+    a2: 0x00,
+    // flags
+    f: 0x00,
+    f2: 0x00,
+    // general purpose
     bc: 0x0000,
     bc2: 0x0000,
     de: 0x0000,
     de2: 0x0000,
     hl: 0x0000,
     hl2: 0x0000,
+    // indirect
     ix: 0x0000,
     iy: 0x0000,
     i: 0x00,
@@ -19,20 +35,148 @@ class ProcessorZ80
   }
 
   // F register bitmasks
-  #FLAG_C = 0  // carry
-  #FLAG_N = 1  // subtract (1 if last opcode was subtract)
-  #FLAG_PV = 2 // parity/overflow; P1 if even number of bits, V if 2-comp doesn't fit in register
-  #FLAG_F3 = 3 // undocumented, copy of PV
-  #FLAG_H = 4  // half carry (if nibble overflows)
-  #FLAG_F5 = 5 // undocumented, copy of H
-  #FLAG_Z = 6  // zero; 1 if last comparison was zero
-  #FLAG_S = 7  // sign; 1 if 2-comp is negative (copy of msb)
+  #FREG_C  = 0x01         // carry/borrow (inc/dec didn't fit in register)
+  #FREG_N  = 0x02         // set if last opcode was subtraction
+  #FREG_P  = 0x04         // parity
+  #FREG_V  = this.#FREG_P // overflow (shared with parity)
+  #FREG_F3 = 0x08         // undocumented (usually copy of P/V)
+  #FREG_H  = 0x10         // half carry (3->4 during bcd; fuse's z80 core doesn't implement this)
+  #FREG_F5 = 0x20         // undocumented (usually copy of H)
+  #FREG_Z  = 0x40         // set if last used value is zero
+  #FREG_S  = 0x80         // set if last used value is negative (if 2-comp & msb == 1, set)
 
   // memory area (64KB)
   #ram = new Uint8Array(Math.pow(2, 16))
 
   // opcode instruction table
   #opcodes = {}
+
+  /**
+   * Get the upper byte of a number (MSB)
+   *
+   * @param number  value Value to fetch 8 MSBs from
+   * @return number
+   */
+  #hi = (value) => {
+    return (value & 0xff00) >> 8
+  }
+
+  /**
+   * Get the lower byte of a number (MSB)
+   *
+   * @param number  value Value to fetch 8 LSBs from
+   * @return number
+   */
+  #lo = (value) => {
+    return (value & 0x00ff) // no shift needed, it's the lsb already
+  }
+
+  /**
+   * Create a word (16-bit value) from two bytes
+   *
+   * @param number high High byte for word
+   * @param number low  Low byte for word
+   * @return number
+   */
+  #word = (high, low) => {
+    return (high << 8) | low
+  }
+
+  /**
+   * Add two bytes
+   *
+   * @param number  base  Number to add to
+   * @param number  value Number to add
+   * @return number
+   */
+  #addByte = (base, value) => {
+    return (base + value) & 0xff
+  }
+
+  /**
+   * Add two words
+   *
+   * @param number  base  Number to add to
+   * @param number  value Number to add
+   * @return number
+   */
+  #addWord = (base, value) => {
+    return (base + value) & 0xffff
+  }
+
+  /**
+   * Subtract two bytes
+   *
+   * @param number  base  Number to sub to
+   * @param number  value Number to sub
+   * @return number
+   */
+  #subByte = (base, value) => {
+    return (base - value) & 0xff
+  }
+
+  /**
+   * Subtract two words
+   *
+   * @param number  base  Number to sub to
+   * @param number  value Number to sub
+   * @return number
+   */
+  #subWord = (base, value) => {
+    return (base - value) & 0xffff
+  }
+
+  /**
+   * Put a byte on the stack
+   *
+   * @param number  val Number to push
+   */
+  #pushByte = (val) => {
+    this.#registers.sp = this.#subWord(this.#registers.sp, 1)
+    this.#ram[this.#registers.sp] = val
+  }
+
+  /**
+   * Pull a byte from the stack
+   *
+   * @return number
+   */
+  #popByte = () => {
+    let stackByte = this.#ram[this.#registers.sp]
+    this.#registers.sp = this.#addWord(this.#registers.sp, 1)
+    return stackByte
+  }
+
+  /**
+   * Put a word on the stack
+   *
+   * @param number  val Number to push
+   */
+  #pushWord = (val) => {
+    this.#pushByte(this.#hi(val))
+    this.#pushByte(this.#lo(val))
+  }
+
+  /**
+   * Pull a word from the stack
+   *
+   * @return number
+   */
+  #popWord = () => {
+    let [lo, hi] = [this.#popByte(), this.#popByte()]
+    return this.#word(hi, lo)
+  }
+
+  /**
+   * Shorthand get a byte from the program counter and inc pc
+   *
+   * @return number
+   */
+  #getPC = () => {
+    let val = this.#ram[this.#registers.pc++]
+    this.#registers.pc = this.#registers.pc & 0xffff
+    return val
+  }
 
   /**
    * Setup the opcodes in this.#opcodes ready for use
@@ -135,25 +279,6 @@ class ProcessorZ80
            ((value & 0xff00) >> 8)    // then mask off LSB and move MSB right 8 bits
   }
 
-  /**
-   * Get the upper byte of a number (MSB)
-   *
-   * @param number  value Value to fetch 8 MSBs from
-   * @return number
-   */
-  #getUpperByte = (value) => {
-    return (value & 0xff00) >> 8
-  }
-
-  /**
-   * Get the lower byte of a number (MSB)
-   *
-   * @param number  value Value to fetch 8 LSBs from
-   * @return number
-   */
-  #getLowerByte = (value) => {
-    return (value & 0x00ff) // no shift needed, it's the lsb already
-  }
 
   /**
    * Constructor
