@@ -86,8 +86,9 @@ class ProcessorZ80
     this.#opcodes[0x07] = () => {
       let a = this.#getUpperByte(this.#registers.af)
       let f = this.#getLowerByte(this.#registers.af)
+      f &= ~(1 << this.#FLAG_C)
       if (a & (1 << 7))
-        f = f | (1 << this.#FLAG_C)
+        f |= 1 << this.#FLAG_C
       a = (a << 1) & 0xff
       this.#registers.af = (a << 8) | f
     }
