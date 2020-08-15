@@ -201,6 +201,16 @@ splitInput.forEach((line) => {
       outputBuffer += `// ${mnemonic}\nthis.#opcodes[${opcode}] = () => { this.#interrupts = true }\n`
       break
 
+    case 'push':
+      // push a value onto the stack (always a word)
+      outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#pushWord(this.#registers.${param}) }\n`
+      break
+
+    case 'pop':
+      // pop a value from the stack (always a word)
+      outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#regops.${param}(this.#popWord()) }\n`
+      break
+
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
 
