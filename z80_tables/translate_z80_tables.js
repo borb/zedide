@@ -41,7 +41,9 @@ splitInput.forEach((line) => {
   // argument can be a number of things, we will branch accordingly (and parse accordingly)
   let [opcode, mnemonic, param] = line.split(/ /)
   mnemonic = mnemonic.toLowerCase()
-  param = (typeof param !== 'undefined') ? param.toLowerCase() : undefined
+  param = (typeof param !== 'undefined')
+    ? param.toLowerCase()
+    : undefined
 
   // @todo handle f register flags
 
@@ -130,6 +132,16 @@ splitInput.forEach((line) => {
     case 'exx':
       // swap bc, de, hl with bc', de', hl'
       outputBuffer += `// ${mnemonic}\nthis.#opcodes[${opcode}] = () => {\n  let [bc, de, hl] = [this.#regops.bc(), this.#regops.de(), this.#regops.hl()]\n  this.#regops.bc(this.#regops.bc2())\n  this.#regops.de(this.#regops.de2())\n  this.#regops.hl(this.#regops.hl2())\n  this.#regops.bc2(bc)\n  this.#regops.de2(de)\n  this.#regops.hl2(hl)\n}\n`
+      break
+
+    case 'ex':
+      // exchange registers with each other (z80 only has one; af with af')
+      if (param !== 'af,af\'') {
+        console.warn(`unhandled ex param: ${mnemonic} ${param}`)
+        break
+      }
+
+      outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let af = this.#regops.af()\n  this.#regops.af(this.#regops.af2())\n  this.#regops.af2(af)\n}\n`
       break
 
     default:
