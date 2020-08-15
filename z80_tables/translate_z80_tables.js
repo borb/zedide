@@ -73,6 +73,8 @@ splitInput.forEach((line) => {
 
       console.warn(`unhandled ld type: ${mnemonic} ${param}`)
       break
+    default:
+      console.warn(`unhandled mnemonic: ${mnemonic}`)
 
   }
 })
