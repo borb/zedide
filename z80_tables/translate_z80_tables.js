@@ -211,9 +211,44 @@ splitInput.forEach((line) => {
       outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#regops.${param}(this.#popWord()) }\n`
       break
 
+    case 'inc':
+      // increment by one
+      switch (param) {
+        // there is no af, because incrementing the flag register makes no sense
+        case 'bc':
+        case 'de':
+        case 'hl':
+        case 'sp':
+          // inc on these registers doesn't affect flags
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#registers.${param} = this.#addWord(this.#registers.${param}, 1) }\n`
+          break
+
+        default:
+          console.warn(`unhandled inc param: ${mnemonic} ${param}`)
+          break
+      }
+      break
+
+    case 'dec':
+      // decrement by one
+      switch (param) {
+        // there is no af, because decrementing the flag register makes no sense
+        case 'bc':
+        case 'de':
+        case 'hl':
+        case 'sp':
+          // dec on these registers doesn't affect flags
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#registers.${param} = this.#subWord(this.#registers.${param}, 1) }\n`
+          break
+
+        default:
+          console.warn(`unhandled dec param: ${mnemonic} ${param}`)
+          break
+      }
+      break
+
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
-
   }
 })
 
