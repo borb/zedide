@@ -34,6 +34,65 @@ class ProcessorZ80
     r: 0x00
   }
 
+  // shorthand getter/setter access for registers, prevents having to recombine hi/lo bytes
+  // into words before writing to registers in opcode emulation.
+  // this REALLY helps with the translate_z80_tables.js dat->js generator.
+  #regops = {
+    // generic read/write (prefixed with _ to discourage use outside of here)
+    _gen: (register, newVal) => {
+      if (typeof newVal === 'undefined')
+        return this.#registers[register]
+      this.#registers[register] = newVal
+    },
+    // 8-bit ops (excluding i and r, which use {}._gen())
+    _genHi: (register, newVal) => {
+      if (typeof newVal === 'undefined')
+        return this.#hi(this.#registers[register])
+      this.#registers[register] = this.#word(newVal, this.#lo(this.#registers[register]))
+    },
+    _genLo: (register, newVal) => {
+      if (typeof newVal === 'undefined')
+        return this.#lo(this.#registers[register])
+      this.#registers[register] = this.#word(this.#hi(this.#registers[register], newval))
+    },
+
+    // map the above three methods to shorthand register operations
+
+    pc: (newPC) => this.#regops._gen('pc', newPC), // no 8-bit split
+    sp: (newSP) => this.#regops._gen('sp', newSP), // no 8-bit split
+
+    a: (newA) => this.#regops._genHi('af', newA),
+    f: (newF) => this.#regops._genLo('af', newF),
+    af: (newAF) => this.#regops._gen('af', newAF),
+    af2: (newAF2) => this.#regops._gen('af2', newAF2),
+
+    b: (newB) => this.#regops._genHi('bc', newB),
+    c: (newC) => this.#regops._genLo('bc', newC),
+    bc: (newBC) => this.#regops._gen('bc', newBC),
+    bc2: (newBC2) => this.#regops._gen('bc2', newBC2),
+
+    d: (newD) => this.#regops._genHi('de', newD),
+    e: (newE) => this.#regops._genLo('de', newE),
+    de: (newDE) => this.#regops._gen('de', newDE),
+    de2: (newDE2) => this.#regops._gen('de2', newDE2),
+
+    h: (newH) => this.#regops._genHi('hl', newH),
+    l: (newL) => this.#regops._genLo('hl', newL),
+    hl: (newHL) => this.#regops._gen('hl', newHL),
+    hl2: (newHL2) => this.#regops._gen('hl2', newHL2),
+
+    ixh: (newIXH) => this.#regops._genHi('ix', newIXH),
+    ixl: (newIXL) => this.#regops._genLo('ix', newIXL),
+    ix: (newIX) => this.#regops._gen('ix', newIX),
+
+    iyh: (newIYH) => this.#regops._genHi('iy', newIYH),
+    iyl: (newIYL) => this.#regops._genLo('iy', newIYL),
+    iy: (newIY) => this.#regops._gen('iy', newIY),
+
+    i: (newI) => this.#regops._gen('i', newI), // no 16-bit combination
+    r: (newR) => this.#regops._gen('r', newR)  // no 16-bit combination
+  }
+
   // F register bitmasks
   #FREG_C  = 0x01         // carry/borrow (inc/dec didn't fit in register)
   #FREG_N  = 0x02         // set if last opcode was subtraction
