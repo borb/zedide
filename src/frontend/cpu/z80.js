@@ -14,12 +14,9 @@ class ProcessorZ80
     pc: 0x0000,
     // stack pointer
     sp: 0x0000,
-    // accumulator
-    a: 0x00,
-    a2: 0x00,
-    // flags
-    f: 0x00,
-    f2: 0x00,
+    // accumulator & flags
+    af: 0x0000,
+    af2: 0x0000,
     // general purpose
     bc: 0x0000,
     bc2: 0x0000,
