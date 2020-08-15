@@ -8,6 +8,9 @@
  */
 class ProcessorZ80
 {
+  // interrupts
+  #interrupts = true
+
   // cpu registers
   #registers = {
     // program counter

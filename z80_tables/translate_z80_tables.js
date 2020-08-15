@@ -191,6 +191,16 @@ splitInput.forEach((line) => {
 
       break
 
+    case 'di':
+      // disable interrupts
+      outputBuffer += `// ${mnemonic}\nthis.#opcodes[${opcode}] = () => { this.#interrupts = false }\n`
+      break
+
+    case 'ei':
+      // enable interrupts
+      outputBuffer += `// ${mnemonic}\nthis.#opcodes[${opcode}] = () => { this.#interrupts = true }\n`
+      break
+
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
 
