@@ -135,13 +135,60 @@ splitInput.forEach((line) => {
       break
 
     case 'ex':
-      // exchange registers with each other (z80 only has one; af with af')
-      if (param !== 'af,af\'') {
-        console.warn(`unhandled ex param: ${mnemonic} ${param}`)
+      // exchange values with each other
+      if (param == 'af,af\'') {
+        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let af = this.#regops.af()\n  this.#regops.af(this.#regops.af2())\n  this.#regops.af2(af)\n}\n`
         break
       }
 
-      outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let af = this.#regops.af()\n  this.#regops.af(this.#regops.af2())\n  this.#regops.af2(af)\n}\n`
+      console.warn(`unhandled ex param: ${mnemonic} ${param}`)
+      break
+
+    case 'ret':
+      // return from a subroutine call (pop word from sp and load into pc)
+      if (typeof param === 'undefined') {
+        outputBuffer += `// ${mnemonic}\nthis.#opcodes[${opcode}] = () => { this.#regops.pc(this.#popWord()) }\n`
+        break
+      }
+
+      switch (param) {
+        case 'z': // zero bit
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (this.#regops.f() & this.#FREG_Z)\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'nz': // zero bit
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (!(this.#regops.f() & this.#FREG_Z))\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'c': // carry flag bit
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (this.#regops.f() & this.#FREG_C)\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'nc': // carry flag bit
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (!(this.#regops.f() & this.#FREG_C))\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'pe': // parity flag bit (equal)
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (this.#regops.f() & this.#FREG_P)\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'po': // parity flag bit (odd)
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (!(this.#regops.f() & this.#FREG_P))\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'p': // sign bit (what is 'p'?)
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (!(this.#regops.f() & this.#FREG_S))\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        case 'm': // sign bit (what is 'm'?)
+          outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () {\n  if (this.#regops.f() & this.#FREG_S)\n    this.#regops.pc(this.#popWord())\n}\n`
+          break
+
+        default:
+          console.warn(`unhandled ret param: ${mnemonic} ${param}`)
+          break
+      }
+
       break
 
     default:
