@@ -255,36 +255,6 @@ class ProcessorZ80
   }
 
   /**
-   * Get a byte from PC
-   *
-   * @return number
-   */
-  #getUint8FromPC = () => {
-    return this.#ram[this.#registers.pc++]
-  }
-
-  /**
-   * Get two bytes from PC, adhering to little endianness
-   *
-   * @return number
-   */
-  #getUint16FromPC = () => {
-    return this.#ram[this.#registers.pc++] + (16 * this.#ram[this.#registers.pc++])
-  }
-
-  /**
-   * Perform a byteswap (0xaabb becomes 0xbbaa)
-   *
-   * @param number  value Value to be byteswapped
-   * @return number
-   */
-  #byteSwap = (value) => {
-    return ((value & 0x00ff) << 8) |  // mask off MSB and move LSB left 8 bits
-           ((value & 0xff00) >> 8)    // then mask off LSB and move MSB right 8 bits
-  }
-
-
-  /**
    * Constructor
    *
    * @param Uint8Array ram    64KB of memory for the CPU
