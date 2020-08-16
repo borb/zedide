@@ -247,6 +247,51 @@ splitInput.forEach((line) => {
       }
       break
 
+    case 'call':
+      // call a subroutine (put pc on the stack so we can use ret)
+      if (param == 'nnnn') {
+        // unconditional call
+        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes.[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#pushWord(this.#registers.sp)\n  this.#registers.pc = this.#word(hi, lo)\n}\n`
+        break
+      }
+
+      let [flagOp] = param.split(/,/)
+
+      // leave early so we can shortcut the outputBuffer concat and save code
+      // we do this because we ALWAYS need to pull the call address from pc&pc+1,
+      // even if we never meet the branch condition.
+      if ('z,nz,c,nc,po,pe,p,m'.split(/,/).indexOf(flagOp) === -1) {
+        console.warn(`unhandled call param: ${mnemonic} ${param}`)
+        break
+      }
+
+      outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes.[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  `
+      switch (flagOp) {
+        case 'z':
+        case 'c':
+          outputBuffer += `if (this.#regops.f() & this.#FREG_${flagOp.toUpperCase()})\n    this.#regops.pc(this.#word(hi, lo))`
+          break
+        case 'nz':
+        case 'nc':
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_${flagOp[1].toUpperCase()}))\n    this.#regops.pc(this.#word(hi, lo))`
+          break
+        case 'pe':
+          outputBuffer += `if (this.#regops.f() & this.#FREG_P)\n    this.#regops.pc(this.#word(hi, lo))`
+          break
+        case 'po':
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_P))\n    this.#regops.pc(this.#word(hi, lo))`
+          break
+        case 'p':
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_S))\n    this.#regops.pc(this.#word(hi, lo))`
+          break
+        case 'm':
+          outputBuffer += `if (this.#regops.f() & this.#FREG_S)\n    this.#regops.pc(this.#word(hi, lo))`
+          break
+      }
+      outputBuffer += '\n}\n'
+
+      break
+
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
   }
