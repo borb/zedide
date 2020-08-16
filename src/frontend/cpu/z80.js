@@ -250,63 +250,8 @@ class ProcessorZ80
    * @return void
    */
   #initOpcodes = () => {
-    // nop
-    this.#opcodes[0x00] = () => {}
-    // ld bc, **
-    this.#opcodes[0x01] = () => {
-      this.#registers.bc = this.#byteSwap(this.#getUint16FromPC())
-    }
-    // ld (bc), a
-    this.#opcodes[0x02] = () => {
-      // @todo does bc need byteswapping before this?
-      this.#ram[this.#registers.bc] = this.#getUpperByte(this.#registers.af)
-    }
-    // inc bc
-    this.#opcodes[0x03] = () => {
-      this.#registers.bc++
-      if (this.#registers.bc == 0xffff)
-        this.#registers.bc = 0x0000
-    }
-    // inc b
-    this.#opcodes[0x04] = () => {
-      let b = this.#getUpperByte(this.#registers.bc) + 1
-      if (b == 0x100)
-        b = 0
-      this.#registers.bc = (b << 8) | this.#getLowerByte(this.#registers.bc)
-    }
-    // dec b
-    this.#opcodes[0x05] = () => {
-      let b = this.#getUpperByte(this.#registers.bc) - 1
-      if (b == -1)
-        b = 0xff
-      this.#registers.bc = (b << 8) | this.#getLowerByte(this.#registers.bc)
-    }
-    // ld b, *
-    this.#opcodes[0x06] = () => {
-      this.#registers.bc = (this.#getUint8FromPC() << 8) | this.#getLowerByte(this.#registers.bc)
-    }
-    // rlca
-    this.#opcodes[0x07] = () => {
-      let a = this.#getUpperByte(this.#registers.af)
-      let f = this.#getLowerByte(this.#registers.af)
-      f &= ~(1 << this.#FLAG_C)
-      if (a & (1 << 7))
-        f |= 1 << this.#FLAG_C
-      a = (a << 1) & 0xff
-      this.#registers.af = (a << 8) | f
-    }
-    // ex af, af'
-    this.#opcodes[0x08] = () => {
-      let temp = this.#registers.af2
-      this.#registers.af2 = this.#registers.af
-      this.#registers.af = temp
-    }
-    // add hl, bc
-    this.#opcodes[0x09] = () => {
-      this.#registers.hl += this.#registers.bc
-      if (this.#registers.hl > 0xffff)
-        this.#registers.hl -= 0x10000
-    }
+    // START: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*
+    // END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*
   }
 
   /**
