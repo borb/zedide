@@ -110,6 +110,37 @@ class ProcessorZ80
   // opcode instruction table
   #opcodes = {}
 
+  // flag tables for F3, F5, Z and S flags (ported from philip kendall's z80.c line 133)
+  #flagTable = {
+    sz53: [],
+    parity: [],
+    sz53p: [], // will contain ORed values for adjacent array members of above
+  }
+
+  /**
+   * Generate the flagTable tables for sign, zero, parity/overflow, F3 and F5 undocumented flags.
+   *
+   * Ported directly from Philip Kendall's z80.c (fuse emulator), line 133, with immense gratitude.
+   */
+  #initialiseFlagTables = () => {
+    for (let i = 0; i < 0x100; i++) {
+      let [j, parity] = [i, 0]
+
+      for (let k = 0; k < 8; k++) {
+        parity ^= j & 1
+        j >>= 1
+      }
+
+      this.#flagTable.sz53.push(i & (this.#FREG_F3 | this.#FREG_F5 | this.#FREG_S))
+      this.#flagTable.parity.push(parity ? 0 : this.#FREG_P)
+      this.#flagTable.sz53p.push(this.#flagTable.sz53[i] | this.#flagTable.parity[i])
+    }
+
+    // whatever happens, a value of zero always means the zero flag is set
+    this.#flagTable.sz53[0] |= this.#FREG_Z
+    this.#flagTable.sz53p[0] |= this.#FREG_Z
+  }
+
   /**
    * Get the upper byte of a number (MSB)
    *
@@ -270,6 +301,9 @@ class ProcessorZ80
     if (ram !== null) {
       this.#ram = ram
     }
+
+    // initialise the F register flag tables
+    this.#initialiseFlagTables()
 
     // setup the cpu opcodes
     this.#initOpcodes()
