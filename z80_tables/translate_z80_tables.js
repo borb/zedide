@@ -74,7 +74,7 @@ splitInput.forEach((line) => {
 
       if (parts[0].length == 2 && parts[1] == 'nnnn') {
         // simple word load
-        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#word(hi, lo)) }\n`
+        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#word(hi, lo))\n}\n`
         break
       }
 
