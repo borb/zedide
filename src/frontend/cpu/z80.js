@@ -11,15 +11,15 @@ class ProcessorZ80
   // interrupts
   #interrupts = true
 
-  // cpu registers
+  // cpu registers (initial states)
   #registers = {
     // program counter
     pc: 0x0000,
-    // stack pointer
-    sp: 0x0000,
+    // stack pointer (works backwards; sp is always current pop val, push goes to sp--)
+    sp: 0xffff,
     // accumulator & flags
-    af: 0x0000,
-    af2: 0x0000,
+    af: 0xffff,
+    af2: 0xffff,
     // general purpose
     bc: 0x0000,
     bc2: 0x0000,
