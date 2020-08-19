@@ -248,17 +248,23 @@ splitInput.forEach((line) => {
       break
 
     case 'call':
-      // call a subroutine (put pc on the stack so we can use ret)
+    case 'jp':
+      // call: call a subroutine (put pc on the stack so we can use ret)
+      // jp: jump to another program location (change the pc to new location)
+      let pushReturnAddress = (mnemonic == 'call')
+        ? '  this.#pushWord(this.#registers.pc)\n'
+        : ''
+
       if (param == 'nnnn') {
-        // unconditional call
-        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes.[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#pushWord(this.#registers.sp)\n  this.#registers.pc = this.#word(hi, lo)\n}\n`
+        // unconditional
+        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes.[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#registers.pc = this.#word(hi, lo)\n${pushReturnAddress}}\n`
         break
       }
 
       let [flagOp] = param.split(/,/)
 
       // leave early so we can shortcut the outputBuffer concat and save code
-      // we do this because we ALWAYS need to pull the call address from pc&pc+1,
+      // we do this because we ALWAYS need to pull the call address from pc&pc++,
       // even if we never meet the branch condition.
       if ('z,nz,c,nc,po,pe,p,m'.split(/,/).indexOf(flagOp) === -1) {
         console.warn(`unhandled call param: ${mnemonic} ${param}`)
@@ -269,26 +275,26 @@ splitInput.forEach((line) => {
       switch (flagOp) {
         case 'z':
         case 'c':
-          outputBuffer += `if (this.#regops.f() & this.#FREG_${flagOp.toUpperCase()})\n    this.#regops.pc(this.#word(hi, lo))`
+          outputBuffer += `if (this.#regops.f() & this.#FREG_${flagOp.toUpperCase()})`
           break
         case 'nz':
         case 'nc':
-          outputBuffer += `if (!(this.#regops.f() & this.#FREG_${flagOp[1].toUpperCase()}))\n    this.#regops.pc(this.#word(hi, lo))`
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_${flagOp[1].toUpperCase()}))`
           break
         case 'pe':
-          outputBuffer += `if (this.#regops.f() & this.#FREG_P)\n    this.#regops.pc(this.#word(hi, lo))`
+          outputBuffer += `if (this.#regops.f() & this.#FREG_P)`
           break
         case 'po':
-          outputBuffer += `if (!(this.#regops.f() & this.#FREG_P))\n    this.#regops.pc(this.#word(hi, lo))`
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_P))`
           break
         case 'p':
-          outputBuffer += `if (!(this.#regops.f() & this.#FREG_S))\n    this.#regops.pc(this.#word(hi, lo))`
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_S))`
           break
         case 'm':
-          outputBuffer += `if (this.#regops.f() & this.#FREG_S)\n    this.#regops.pc(this.#word(hi, lo))`
+          outputBuffer += `if (this.#regops.f() & this.#FREG_S)`
           break
       }
-      outputBuffer += '\n}\n'
+      outputBuffer += `\n    this.#regops.pc(this.#word(hi, lo))\n${pushReturnAddress}}\n`
 
       break
 
