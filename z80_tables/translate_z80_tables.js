@@ -238,7 +238,17 @@ splitInput.forEach((line) => {
         case 'iyh':
         case 'iyl':
             // thanks to philip kendall; flag handling ported from fuse's z80_macros.h
-            outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  this.#regops.${param}(this.#addByte(this.#regops.${param}(), 1))\n  this.#regops.f(\n      this.#regops.f()\n    | this.#FREG_C\n    | ((this.#regops.${param}() & 0x0f) ? 0 : this.#FREG_H)\n    | ((this.#regops.f() == 0x80) ? this.#FREG_V : 0)\n    | this.#flagTable.sz53[this.#regops.${param}()]\n  )\n}\n`
+            outputBuffer += `// ${mnemonic} ${param}\n` +
+              `this.#opcodes[${opcode}] = () => {\n` +
+              `  this.#regops.${param}(this.#addByte(this.#regops.${param}(), 1))\n` +
+              `  this.#regops.f(\n` +
+              `      this.#regops.f()\n` +
+              `    | this.#FREG_C\n` +
+              `    | ((this.#regops.${param}() & 0x0f) ? 0 : this.#FREG_H)\n` +
+              `    | ((this.#regops.f() == 0x80) ? this.#FREG_V : 0)\n` +
+              `    | this.#flagTable.sz53[this.#regops.${param}()]\n` +
+              `  )\n` +
+              `}\n`
             break
 
         default:
@@ -275,7 +285,19 @@ splitInput.forEach((line) => {
         case 'iyh':
         case 'iyl':
             // again, thanks to philip kendall; flag handling ported from fuse's z80_macros.h
-            outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let old = this.#regops.${param}()\n  this.#regops.${param}(this.#subByte(this.#regops.${param}(), 1))\n  this.#regops.f(\n      this.#regops.f()\n    | this.#FREG_C\n    | ((old & 0x0f) ? 0 : this.#FREG_H)\n    | this.#FREG_N\n    | ((this.#regops.${param}() == 0x7f) ? this.#FREG_V : 0)\n    | this.#flagTable.sz53[this.#regops.${param}()]\n  )\n}\n`
+            outputBuffer += `// ${mnemonic} ${param}\n` +
+            `this.#opcodes[${opcode}] = () => {\n` +
+            `  let old = this.#regops.${param}()\n` +
+            `  this.#regops.${param}(this.#subByte(this.#regops.${param}(), 1))\n` +
+            `  this.#regops.f(\n` +
+            `      this.#regops.f()\n` +
+            `    | this.#FREG_C\n` +
+            `    | ((old & 0x0f) ? 0 : this.#FREG_H)\n` +
+            `    | this.#FREG_N\n` +
+            `    | ((this.#regops.${param}() == 0x7f) ? this.#FREG_V : 0)\n` +
+            `    | this.#flagTable.sz53[this.#regops.${param}()]\n` +
+            `  )\n` +
+            `}\n`
             break
 
         default:
