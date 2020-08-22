@@ -136,8 +136,32 @@ splitInput.forEach((line) => {
 
     case 'ex':
       // exchange values with each other
-      if (param == 'af,af\'') {
-        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => {\n  let af = this.#regops.af()\n  this.#regops.af(this.#regops.af2())\n  this.#regops.af2(af)\n}\n`
+      // these ops are only 16-bit; don't need to worry about parity, half, etc.
+      let [reg1, reg2] = param.split(/,/)
+
+      if (reg1.length == 2 && ((reg2 === 'af\'') || (reg2.length == 2))) {
+        // exchange between registers
+        reg2 = reg2.replace(/^af'$/, 'af2')
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` +
+          `  let temp = this.#regops.${reg1}()\n` +
+          `  this.#regops.${reg1}(this.#regops.${reg2}())\n` +
+          `  this.#regops.${reg2}(temp)\n` +
+          `}\n`
+        break
+      }
+
+      if (reg1.match(/\(..\)/)) {
+        // exchange between ram and word register
+        reg1 = reg1.replace(/[()]/g, '')
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` +
+          `  let temp = this.#registers.${reg2}\n` +
+          `  let [lo, hi] = [this.#ram[this.#registers.${reg1}], this.#ram[this.#addWord(this.#registers.${reg1}, 1)]]\n` +
+          `  this.#registers.${reg2} = this.#word(hi, lo)\n` +
+          `  this.#ram[this.#registers.${reg1}] = this.#lo(temp)\n` +
+          `  this.#ram[this.#addWord(this.#registers.${reg1}, 1)] = this.#hi(temp)\n` +
+          `}\n`
         break
       }
 
@@ -237,19 +261,37 @@ splitInput.forEach((line) => {
         case 'ixl':
         case 'iyh':
         case 'iyl':
-            // thanks to philip kendall; flag handling ported from fuse's z80_macros.h
-            outputBuffer += `// ${mnemonic} ${param}\n` +
-              `this.#opcodes[${opcode}] = () => {\n` +
-              `  this.#regops.${param}(this.#addByte(this.#regops.${param}(), 1))\n` +
-              `  this.#regops.f(\n` +
-              `      this.#regops.f()\n` +
-              `    | this.#FREG_C\n` +
-              `    | ((this.#regops.${param}() & 0x0f) ? 0 : this.#FREG_H)\n` +
-              `    | ((this.#regops.f() == 0x80) ? this.#FREG_V : 0)\n` +
-              `    | this.#flagTable.sz53[this.#regops.${param}()]\n` +
-              `  )\n` +
-              `}\n`
-            break
+          // thanks to philip kendall; flag handling ported from fuse's z80_macros.h
+          outputBuffer += `// ${mnemonic} ${param}\n` +
+            `this.#opcodes[${opcode}] = () => {\n` +
+            `  this.#regops.${param}(this.#addByte(this.#regops.${param}(), 1))\n` +
+            `  this.#regops.f(\n` +
+            `      this.#regops.f()\n` +
+            `    | this.#FREG_C\n` +
+            `    | ((this.#regops.${param}() & 0x0f) ? 0 : this.#FREG_H)\n` +
+            `    | ((this.#regops.f() == 0x80) ? this.#FREG_V : 0)\n` +
+            `    | this.#flagTable.sz53[this.#regops.${param}()]\n` +
+            `  )\n` +
+            `}\n`
+          break
+
+
+        case '(hl)':
+          // increment 8-bit value in memory
+          outputBuffer += `// ${mnemonic} ${param}\n` +
+            `this.#opcodes[${opcode}] = () => {\n` +
+            `  let old = this.#ram[this.#registers.hl]\n` +
+            `  let new = this.#addByte(old, 1)\n` +
+            `  this.#ram[this.#registers.hl] = new\n` +
+            `  this.#regops.f(\n` +
+            `      this.#regops.f()\n` +
+            `    | this.#FREG_C\n` +
+            `    | ((old & 0x0f) ? 0 : this.#FREG_H)\n` +
+            `    | ((new == 0x80) ? this.#FREG_V : 0)\n` +
+            `    | this.#flagTable.sz53[new]\n` +
+            `  )\n` +
+            `}\n`
+          break
 
         default:
           console.warn(`unhandled inc param: ${mnemonic} ${param}`)
@@ -284,21 +326,39 @@ splitInput.forEach((line) => {
         case 'ixl':
         case 'iyh':
         case 'iyl':
-            // again, thanks to philip kendall; flag handling ported from fuse's z80_macros.h
-            outputBuffer += `// ${mnemonic} ${param}\n` +
+          // again, thanks to philip kendall; flag handling ported from fuse's z80_macros.h
+          outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` +
+          `  let old = this.#regops.${param}()\n` +
+          `  this.#regops.${param}(this.#subByte(this.#regops.${param}(), 1))\n` +
+          `  this.#regops.f(\n` +
+          `      this.#regops.f()\n` +
+          `    | this.#FREG_C\n` +
+          `    | ((old & 0x0f) ? 0 : this.#FREG_H)\n` +
+          `    | this.#FREG_N\n` +
+          `    | ((this.#regops.${param}() == 0x7f) ? this.#FREG_V : 0)\n` +
+          `    | this.#flagTable.sz53[this.#regops.${param}()]\n` +
+          `  )\n` +
+          `}\n`
+          break
+
+        case '(hl)':
+          // decrement 8-bit value in memory
+          outputBuffer += `// ${mnemonic} ${param}\n` +
             `this.#opcodes[${opcode}] = () => {\n` +
-            `  let old = this.#regops.${param}()\n` +
-            `  this.#regops.${param}(this.#subByte(this.#regops.${param}(), 1))\n` +
+            `  let old = this.#ram[this.#registers.hl]\n` +
+            `  let new = this.#subByte(old, 1)\n` +
+            `  this.#ram[this.#registers.hl] = new\n` +
             `  this.#regops.f(\n` +
             `      this.#regops.f()\n` +
             `    | this.#FREG_C\n` +
             `    | ((old & 0x0f) ? 0 : this.#FREG_H)\n` +
             `    | this.#FREG_N\n` +
-            `    | ((this.#regops.${param}() == 0x7f) ? this.#FREG_V : 0)\n` +
-            `    | this.#flagTable.sz53[this.#regops.${param}()]\n` +
+            `    | ((new == 0x7f) ? this.#FREG_V : 0)\n` +
+            `    | this.#flagTable.sz53[new]\n` +
             `  )\n` +
             `}\n`
-            break
+          break
 
         default:
           console.warn(`unhandled dec param: ${mnemonic} ${param}`)
