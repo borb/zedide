@@ -380,13 +380,19 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (mnemonic == 'jp' && param.match(/(hl|ix|iy)/)) {
+        // unconditional using register value (jp only)
+        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes.[${opcode}] = () => { this.#registers.pc = this.#registers.${param} }\n`
+        break
+      }
+
       let [flagOp] = param.split(/,/)
 
       // leave early so we can shortcut the outputBuffer concat and save code
       // we do this because we ALWAYS need to pull the call address from pc&pc++,
       // even if we never meet the branch condition.
       if ('z,nz,c,nc,po,pe,p,m'.split(/,/).indexOf(flagOp) === -1) {
-        console.warn(`unhandled call param: ${mnemonic} ${param}`)
+        console.warn(`unhandled call/jp param: ${mnemonic} ${param}`)
         break
       }
 
