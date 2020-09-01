@@ -117,6 +117,12 @@ class ProcessorZ80
     sz53p: [], // will contain ORed values for adjacent array members of above
   }
 
+  // half carry and overflow (underflow for sub?) tables. ported from fuse emulator with gratitude.
+  #halfCarryAdd = [0, this.#FREG_H, this.#FREG_H, this.#FREG_H, 0, 0, 0, this.#FREG_H]
+  #halfCarrySub = [0, 0, this.#FREG_H, 0, this.#FREG_H, 0, this.#FREG_H, this.#FREG_H]
+  #overflowAdd = [0, 0, 0, this.#FREG_V, this.#FREG_V, 0, 0, 0]
+  #overflowSub = [0, this.#FREG_V, 0, 0, 0, 0, this.#FREG_V, 0]
+
   /**
    * Generate the flagTable tables for sign, zero, parity/overflow, F3 and F5 undocumented flags.
    *
