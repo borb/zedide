@@ -423,6 +423,17 @@ splitInput.forEach((line) => {
 
       break
 
+    case 'scf':
+      // set carry flag: c is set; p/v, z & s are unaffected; n & h are unset; f3 & f5 are set they leak out of the accumulator
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.f(\n` +
+        `    (this.#regops.f() & ~(this.#FREG_N | this.#FREG_H)) |\n` +
+        `    (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `  )\n` +
+        `}\n`
+      break
+
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
   }
