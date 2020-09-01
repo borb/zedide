@@ -450,6 +450,18 @@ splitInput.forEach((line) => {
         `}\n`
       break
 
+    case 'add':
+      let [dst, src] = param.split(/,/)
+
+      if (dst.length == 2 && src.length == 2) {
+        // word+word
+        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#regops.${dst}(this.#add16(this.#regops.${dst}(), this.#regops.${src}())) }\n`
+        break
+      }
+
+      console.warn(`unhandled add param: ${mnemonic} ${param}`)
+      break
+
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
   }

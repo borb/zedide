@@ -147,6 +147,24 @@ class ProcessorZ80
     this.#flagTable.sz53p[0] |= this.#FREG_Z
   }
 
+  // Ported from Philip Kendall's ADD16, with changes by myself
+  #add16 = (value1, value2) => {
+    let [overflowedResult, finalResult] = [value1 + value2, this.#addWord(value1, value2)]
+    let hcaLookup = ((value1 & 0x0800) >> 11) |
+                    ((value2 & 0x0800) >> 10) |
+                    ((overflowedResult & 0x0800) >> 9)
+
+    // affect the flags according to the half carry add lookup and return the product
+    // summary: v, z, s unaffected; c set if > 0xffff, f3 & f5 are weird
+    this.#regops.f(
+      this.#regops.f() & (this.#FREG_V | this.#FREG_Z | this.#FREG_S) |
+      ((overflowedResult & 0x10000) ? this.#FREG_C : 0) |
+      ((overflowedResult >> 8) & (this.#FREG_F3 | this.#FREG_F5)) |
+      this.#halfCarryAdd[hcaLookup]
+    )
+    return finalResult
+  }
+
   /**
    * Get the upper byte of a number (MSB)
    *
