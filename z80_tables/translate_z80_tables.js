@@ -420,16 +420,32 @@ splitInput.forEach((line) => {
           break
       }
       outputBuffer += `\n    this.#regops.pc(this.#word(hi, lo))\n${pushReturnAddress}}\n`
-
       break
 
     case 'scf':
       // set carry flag: c is set; p/v, z & s are unaffected; n & h are unset; f3 & f5 are set they leak out of the accumulator
+      // explanation of below: take f, mask out n and h, mask out f3 and f5 then bring them back in if they leak from a.
       outputBuffer += `// ${mnemonic}\n` +
         `this.#opcodes[${opcode}] = () => {\n` +
         `  this.#regops.f(\n` +
-        `    (this.#regops.f() & ~(this.#FREG_N | this.#FREG_H)) |\n` +
-        `    (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `    this.#regops.f() & ~(this.#FREG_N | this.#FREG_H)\n` +
+        `    & ~(this.#FREG_F3 | this.#FREG_F5)\n` +
+        `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `  )\n` +
+        `}\n`
+      break
+
+    case 'ccf':
+      // ccf, which you'd think is "clear carry flag" but is actually "invert carry flag"
+      // upon inspection of fuse, it seems to say "if c is set, set the h flag, else set c"
+      // f3 and f5 leak out of the accumulator, as they do with scf. p, z & s unchanged.
+      // i'm pretty sure i'm being trolled by cpu engineers from history.
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.f(\n` +
+        `    this.#regops.f() | ((this.#regops.f() & this.#FREG_C) ? this.#FREG_H : this.#FREG_C)\n` +
+        `    & ~(this.#FREG_F3 | this.#FREG_F5)\n` +
+        `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
         `  )\n` +
         `}\n`
       break
