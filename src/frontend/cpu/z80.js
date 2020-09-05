@@ -165,6 +165,42 @@ class ProcessorZ80
     return finalResult
   }
 
+  // ...and ported from Philip Kendall's ADD with changes by myself
+  #add8 = (value1, value2) => {
+    // in reality, all adds stack onto the accumulator, but let's retain convention with add16
+    let [overflowedResult, finalResult] = [value1 + value2, this.#addByte(value1, value2)]
+    let hcaLookup = ((value1 & 0x88) >> 3) |
+                    ((value2 & 0x88) >> 2) |
+                    ((overflowedResult & 0x88) >> 1)
+
+    // flag affection; this is simpler in comparison to add16. unlike add16, add a,* affects ALL flags
+    this.#regops.f(
+      (overflowedResult & 0x100 ? this.#FREG_C : 0) |
+      this.#halfCarryAdd[hcaLookup & 0x07] |
+      this.#overflowAdd[hcaLookup >> 4] |
+      this.#flagTable.sz53[finalResult]
+    )
+
+    return finalResult
+  }
+
+  // ...also PK's SUB with subtle changes
+  #sub8 = (value1, value2) => {
+    let [underflowedResult, finalResult] = [value1 - value2, this.#subByte(value1, value2)]
+    let hcsLookup = ((value1 & 0x88) >> 3) |
+                    ((value2 & 0x88) >> 2) |
+                    ((underflowedResult & 0x88) >> 1)
+
+    // flag affection (simple like add8; except N flag is set)
+    this.#regops.f(
+      (underflowedResult & 0x100 ? this.#FREG_C : 0) |
+      this.#FREG_N |
+      this.#halfCarrySub[hcsLookup & 0x07] |
+      this.#overflowSub[hcsLookup >> 4] |
+      this.#flagTable.sz53[value1]
+    )
+  }
+
   /**
    * Get the upper byte of a number (MSB)
    *

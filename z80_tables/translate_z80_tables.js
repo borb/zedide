@@ -451,16 +451,106 @@ splitInput.forEach((line) => {
       break
 
     case 'add':
+    case 'adc':
+    {
       let [dst, src] = param.split(/,/)
+      let carryPart = ''
+
+      // check if mnemonic is 'adc' and account for the carry flag
+      // funny how the carry flag isn't considered for overflow...
+      if (mnemonic === 'adc') {
+        // over/underflow is ok here as long as later ops clean up after this transaction
+        carryPart = `  this.#regops.${dst}(this.this.#regops.${dst} + (this.#regops.f() & this.#FREG_C ? 1 : 0))\n`
+      }
 
       if (dst.length == 2 && src.length == 2) {
-        // word+word
-        outputBuffer += `// ${mnemonic} ${param}\nthis.#opcodes[${opcode}] = () => { this.#regops.${dst}(this.#add16(this.#regops.${dst}(), this.#regops.${src}())) }\n`
+        // reg word+reg word (destination is ALWAYS hl)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#add16(this.#regops.${dst}(), this.#regops.${src}()))\n` +
+          `}\n`
+        break
+      }
+
+      if (dst.length == 1 && src.length == 1) {
+        // reg byte+reg byte (destination is ALWAYS a)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#add8(this.#regops.${dst}(), this.#regops.${src}()))\n` +
+          `}\n`
+        break
+      }
+
+      if (dst.length == 1 && src === 'nn') {
+        // reg byte+byte
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#add8(this.#regops.${dst}(), this.#getPC()))\n` +
+          `}\n`
+        break
+      }
+
+      if (dst.length == 1 && src.match(/\(..\)/)) {
+        // byte add to a from memory location
+        src = src.replace(/[()]/g, '')
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#add8(this.#regops.${dst}(), this.#ram[this.#regops.${src}()])\n` +
+          `}\n`
         break
       }
 
       console.warn(`unhandled add param: ${mnemonic} ${param}`)
       break
+    }
+
+    case 'sub':
+    case 'sbc':
+    {
+      let [dst, src] = param.split(/,/)
+      let carryPart = ''
+
+      // amusing fact: base opcodes of the z80 don't have a 16-bit register subtract, but does have add
+
+      // check if mnemonic is 'sbc' and account for the carry flag
+      // funny how the carry flag isn't considered for underflow...
+      if (mnemonic === 'sbc') {
+        // over/underflow is ok here as long as later ops clean up after this transaction
+        carryPart = `  this.#regops.${dst}(this.#regops.${dst} - (this.#regops.f() & this.#FREG_C ? 1 : 0))\n`
+      }
+
+      if (dst.length == 1 && src.length == 1) {
+        // reg byte-reg byte (destination always a)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#sub8(this.#regops.${dst}(), this.#regops.${src}()))\n` +
+          `}\n`
+        break
+      }
+
+      // zilog mnemonic is 'sub nn', but for convention with add, support 'sub a,nn'
+      if ((dst === 'nn' && typeof src === 'undefined') || (dst.length == 1 && src === 'nn')) {
+        // reg byte-byte
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#sub8(this.#regops.${dst}(), this.#getPC()))\n` +
+          `}\n`
+        break
+      }
+
+      if (dst.length == 1 && src.match(/\(..\)/)) {
+        // byte sub from a from memory location
+        src = src.replace(/[()]/g, '')
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#sub8(this.#regops.${dst}(), this.#ram[this.#regops.${src}()])\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled sub param: ${mnemonic} ${param}`)
+      break
+    }
 
     default:
       console.warn(`unhandled mnemonic: ${mnemonic}`)
