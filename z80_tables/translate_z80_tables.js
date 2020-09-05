@@ -34,6 +34,7 @@ let splitInput = input.toString().split(/\n/).filter((line) => {
 })
 
 let outputBuffer = ''
+let unhandled = {}
 
 splitInput.forEach((line) => {
   // each opcode line is in the format:
@@ -44,8 +45,6 @@ splitInput.forEach((line) => {
   param = (typeof param !== 'undefined')
     ? param.toLowerCase()
     : undefined
-
-  // @todo handle f register flags
 
   switch (mnemonic) {
     case 'nop':
@@ -552,9 +551,84 @@ splitInput.forEach((line) => {
       break
     }
 
+    case 'rlca':
+      // roll left and carry from a
+      // bit 7 becomes 0 and is copied to flag c
+      // flags: keep p, z and s, F3 and F5 leak from accumulator, set c
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.a(this.#lo((this.#regops.a() << 1) | (this.#regops.a() >> 7))\n` +
+        `  this.#regops.f(\n` +
+        `    (this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S))\n` +
+        `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `    | ((this.#regops.a() & 0x01) ? this.#FREG_C : 0)\n` +
+        `  )\n` +
+        `}\n`
+      break
+
+    case 'rla':
+      // roll left, swapping the carry flag out
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  let carry = (this.#regops.f() & this.#FREG_C) ? 0x01 : 0x00\n` +
+        `  let newCarry = (this.#regops.a() & 0x80) ? this.#FREG_C : 0\n` +
+        `  this.#regops.a(this.#lo((this.#regops.a() << 1) | carry)\n` +
+        `  this.#regops.f(\n` +
+        `    (this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S))\n` +
+        `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `    | newCarry\n` +
+        `  )\n` +
+        `}\n`
+      break
+
+    case 'rrca':
+      // roll right and carry from a
+      // bit 0 becomes 7 and is copied to flag c
+      // flags: keep p, z and s, F3 and F5 leak from accumulator, set c
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.a(this.#lo((this.#regops.a() << 7) | (this.#regops.a() >> 1))\n` +
+        `  this.#regops.f(\n` +
+        `    (this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S))\n` +
+        `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `    | ((this.#regops.a() & 0x80) ? this.#FREG_C : 0)\n` +
+        `  )\n` +
+        `}\n`
+      break
+
+    case 'rra':
+      // roll right, swapping carry flag out
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  let carry = (this.#regops.f() & this.#FREG_C) ? 0x80 : 0x00\n` +
+        `  let newCarry = (this.#regops.a() & 0x01) ? this.#FREG_C : 0\n` +
+        `  this.#regops.a(this.#lo((this.#regops.a() >> 1) | carry)\n` +
+        `  this.#regops.f(\n` +
+        `    (this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S))\n` +
+        `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `    | newCarry\n` +
+        `  )\n` +
+        `}\n`
+      break
+
+    case 'halt':
+      // stop being a cpu and become a doorstop
+      // @todo use a custom exception class?
+      outputBuffer += `// ${mnemonic}\nthis.#opcodes[${opcode}] = () => { throw 'cpu halted by opcode' }\n`
+      break
+
+    case 'shift':
+      // the opcode is a prefix to another table of opcodes (which can, in turn open another table of opcodes, i.e. $ddcb/$fdcb)
+      outputBuffer += `// ${mnemonic} ${param} (subtable of operations)\nthis.#opcodes[${opcode}] = []\n`
+      break
+
     default:
-      console.warn(`unhandled mnemonic: ${mnemonic}`)
-  }
+      if (typeof unhandled[mnemonic] === 'undefined') {
+        console.warn(`unhandled mnemonic: ${mnemonic}`)
+        unhandled[mnemonic] = 0
+      }
+      unhandled[mnemonic]++
+    }
 })
 
 console.log(outputBuffer)

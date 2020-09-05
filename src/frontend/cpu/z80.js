@@ -108,7 +108,7 @@ class ProcessorZ80
   #ram = new Uint8Array(Math.pow(2, 16))
 
   // opcode instruction table
-  #opcodes = {}
+  #opcodes = []
 
   // flag tables for F3, F5, Z and S flags (ported from philip kendall's z80.c line 133)
   #flagTable = {
@@ -330,7 +330,7 @@ class ProcessorZ80
 
   /**
    * Setup the opcodes in this.#opcodes ready for use
-   * This seems like an unusal way of doing things, but:
+   * This seems like an unusual way of doing things, but:
    * - as of 2020, javascript cannot use hex numbers as numerical array indexes
    * - as of 2020, javascript does not have private class methods
    *
