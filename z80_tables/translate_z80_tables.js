@@ -622,6 +622,68 @@ splitInput.forEach((line) => {
       outputBuffer += `// ${mnemonic} ${param} (subtable of operations)\nthis.#opcodes[${opcode}] = []\n`
       break
 
+    case 'djnz':
+      // dec b, if it's not zero, jump to pc+offset (signed)
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  let [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
+        `  this.#regops.b(this.#sub8(this.#regops.b(), 1))\n` +
+        `  if (this.#regops.b())\n` +
+        `    this.#registers.pc = this.#addWord(instructionBase, this.#uint8ToInt8(offset))\n` +
+        `}\n`
+      break
+
+    case 'jr':
+      // like djnz, but either unconditional or based on flags
+
+      if (param === 'offset') {
+        // unconditional
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n` +
+          `  let [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
+          `  this.#registers.pc = this.#addWord(instructionBase, this.#uint8ToInt8(offset))\n` +
+        `}\n`
+        break
+      }
+
+      let [flag] = param.split(/,/)
+      let condition = ''
+
+      // should be between c, nc, z, nz now
+      switch (flag) {
+        case 'z':
+          condition = `this.#regops.f() & this.#FREG_Z`
+          break
+
+        case 'nz':
+          condition = `(this.#regops.f() & this.#FREG_Z) == 0`
+          break
+
+        case 'c':
+          condition = `this.#regops.f() & this.#FREG_C`
+          break
+
+        case 'nc':
+          condition = `(this.#regops.f() & this.#FREG_C) == 0`
+          break
+
+        default:
+          console.warn(`unhandled jr param: ${mnemonic} ${param}`)
+          break
+      }
+
+      if (condition == '')
+        break
+
+      outputBuffer += `// ${mnemonic} ${param}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  let [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
+        `  if (${condition})\n` +
+        `    this.#registers.pc = this.#addWord(instructionBase, this.#uint8ToInt8(offset))\n` +
+        `}\n`
+
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)

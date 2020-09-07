@@ -329,6 +329,16 @@ class ProcessorZ80
   }
 
   /**
+   * Change unsigned 8-bit integer into signed 8-bit integer (two's compliment);
+   * mathematically, this is akin to saying "if bit 8 is set, invert and deduct from -1"
+   * but simplified you can perform a numerical comparison and deduct 0x100
+   *
+   * @param number val  Value to convert to int8
+   * @return number
+   */
+  #uint8ToInt8 = (val) => val > 127 ? val - 256 : val
+
+  /**
    * Setup the opcodes in this.#opcodes ready for use
    * This seems like an unusual way of doing things, but:
    * - as of 2020, javascript cannot use hex numbers as numerical array indexes
