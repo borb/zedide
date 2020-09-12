@@ -684,6 +684,34 @@ splitInput.forEach((line) => {
 
       break
 
+    case 'daa':
+      // decimal adjust after addition; adjust a to contain two digit packed decimal
+      // ported from fuse owing to not being sure how the BCD opcodes work
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  let [add, carry] = [0, this.#regops.f() & this.#FREG_C]\n` +
+        `  \n` +
+        `  if ((this.#regops.f() & this.#FREG_H) || ((this.#regops.a() & 0x0f) > 9))\n` +
+        `    add = 6\n` +
+        `  if (carry || (this.#regops.a() > 0x99))\n` +
+        `    add |= 0x60\n` +
+        `  if (this.#regops.a() > 0x99)\n` +
+        `    carry = this.#FREG_C\n` +
+        `  \n` +
+        `  if (this.#regops.f() & this.#FREG_N)\n` +
+        `    this.#regops.a(this.#sub8(this.#regops.a(), add))\n` +
+        `  else\n` +
+        `    this.#regops.a(this.#add8(this.#regops.a(), add))\n` +
+        `  \n` +
+        `  this.#regops.f(\n` +
+        `      this.#regops.f()\n` +
+        `    & ~(this.#FREG_C | this.#FREG_P))\n` +
+        `    | carry\n` +
+        `    | this.#flagTable.parity[this.#regops.a()]\n` +
+        `  )\n` +
+        `}\n`
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
