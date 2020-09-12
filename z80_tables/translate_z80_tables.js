@@ -712,6 +712,30 @@ splitInput.forEach((line) => {
         `}\n`
       break
 
+    case 'in':
+    case 'out':
+      // input/output
+      let [arg1, arg2] = param.split(/,/)
+
+      arg1 = arg1.replace(/[()]/g, '')
+      arg2 = arg2.replace(/[()]/g, '')
+
+      if (arg1 == 'nn' || arg2 == 'nn') {
+        // read or write by port number in next byte (register is always a)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => {\n`
+
+        outputBuffer += mnemonic == 'in'
+          ? `  this.#regops.a(this.#callIoHandler(this.#getPC(), 'r'))`
+          : `  this.#callIoHandler(this.#getPC(), 'w', this.#regops.a())`
+
+        outputBuffer += `\n}\n`
+        break
+      }
+
+      console.warn(`unhandled ${mnemonic} param: ${mnenonic} ${param}`)
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)

@@ -123,6 +123,9 @@ class ProcessorZ80
   #overflowAdd = [0, 0, 0, this.#FREG_V, this.#FREG_V, 0, 0, 0]
   #overflowSub = [0, this.#FREG_V, 0, 0, 0, 0, this.#FREG_V, 0]
 
+  // input/output handlers
+  #ioHandlers = []
+
   /**
    * Generate the flagTable tables for sign, zero, parity/overflow, F3 and F5 undocumented flags.
    *
@@ -396,6 +399,34 @@ class ProcessorZ80
    */
   fetchExecute()
   {
+  }
+
+  /**
+   * Setup an I/O handler by inserting it into the ioHandler array; an input/output on that port will
+   * call the supplied callback.
+   *
+   * @param number      port    I/O port (0-255) to attach callback to
+   * @param ioFunction  handler Function to call during I/O operation; will pass 'r'/'w' as arg1, uint8 data as arg2
+   * @return void
+   */
+  addIoHandler(port, ioFunction)
+  {
+    this.#ioHandlers[port] = ioFunction
+  }
+
+  /**
+   * CPU opcode helper to call the I/O handler
+   *
+   * @param number      port  I/O port number
+   * @param string      rw    Read/write (r or w)
+   * @param number|void data  Data byte to send/get (may be undefined for reads)
+   * @return number|void
+   */
+  #callIoHandler = (port, rw, data) => {
+    if (typeof this.#ioHandlers[port] === 'undefined')
+      return
+
+    return this.#ioHandlers[port](rw, data)
   }
 }
 
