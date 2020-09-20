@@ -794,12 +794,17 @@ splitInput.forEach((line) => {
       break
     }
 
+    case 'or':
     case 'xor': {
-      // bitwise xor on a register, storing result in the first register (accumulator)
+      // bitwise or/xor on a register, storing result in the first register (accumulator)
       // every flag is affected
       let adjustedParam = (param === 'nn')
         ? 'a,nn'
         : param
+
+      let bitwiseOp = (mnemonic === 'or')
+        ? '|'
+        : '^'
 
       let [dst, src] = adjustedParam.split(/,/)
 
@@ -807,7 +812,7 @@ splitInput.forEach((line) => {
         // src is register (three letter registers are ixh/ixl/iyh/iyl)
         outputBuffer += `// ${mnemonic} ${param}\n` +
         `this.#opcodes[${opcode}] = () => {\n` +
-        `  this.#regops.${dst}(this.#regops.${dst}() ^ this.#regops.${src}())\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ${bitwiseOp} this.#regops.${src}())\n` +
         `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
         `}\n`
         break
@@ -817,7 +822,7 @@ splitInput.forEach((line) => {
         // src is a byte following the opcode
         outputBuffer += `// ${mnemonic} ${param}\n` +
         `this.#opcodes[${opcode}] = () => {\n` +
-        `  this.#regops.${dst}(this.#regops.${dst}() ^ this.#getPC())\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ${bitwiseOp} this.#getPC())\n` +
         `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
         `}\n`
         break
@@ -828,13 +833,13 @@ splitInput.forEach((line) => {
         src = src.replace(/[()]/g, '')
         outputBuffer += `// ${mnemonic} ${param}\n` +
         `this.#opcodes[${opcode}] = () => {\n` +
-        `  this.#regops.${dst}(this.#regops.${dst}() ^ this.#ram[this.#regops.${src}()])\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ${bitwiseOp} this.#ram[this.#regops.${src}()])\n` +
         `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
         `}\n`
         break
       }
 
-      console.warn(`unhandled xor param: ${mnemonic} ${param}`)
+      console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
       break
     }
 
