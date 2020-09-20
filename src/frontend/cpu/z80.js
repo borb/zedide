@@ -206,6 +206,24 @@ class ProcessorZ80
     return finalResult
   }
 
+  // PK's CP; honestly, zilog/intel - if cp is like sub without storing the product, why is it so different?
+  #cp8 = (value1, value2) => {
+    let tempResult = this.#subWord(value1, value2)
+    let hcsLookup = ((value1 & 0x88) >> 3) |
+                    ((value2 & 0x88) >> 2) |
+                    ((tempResult & 0x88) >> 1)
+
+    // flag affection (simple like add8; except N flag is set)
+    this.#regops.f(
+      (tempResult & 0x100 ? this.#FREG_C : (tempResult ? 0 : this.#FREG_Z)) |
+      this.#FREG_N |
+      this.#halfCarrySub[hcsLookup & 0x07] |
+      this.#overflowSub[hcsLookup >> 4] |
+      (value2 & (this.#FREG_F3 | this.#FREG_F5)) |
+      (tempResult & this.#FREG_S)
+    )
+  }
+
   /**
    * Get the upper byte of a number (MSB)
    *

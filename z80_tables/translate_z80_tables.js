@@ -450,8 +450,7 @@ splitInput.forEach((line) => {
       break
 
     case 'add':
-    case 'adc':
-    {
+    case 'adc': {
       let [dst, src] = param.split(/,/)
       let carryPart = ''
 
@@ -851,6 +850,44 @@ splitInput.forEach((line) => {
         `  this.#registers.pc = 0x${param}\n` +
         `}\n`
       break
+
+    case 'cp': {
+      // subtract register from a without changing a; change flags as if the action took place
+      // sort of like a "simulate" action
+
+      // fixup to retain consistency with the ix/iy/register relative ops
+      // bit silly, since it's all on the accumulator anyway
+      let adjustedParam = (param.indexOf(',') === -1)
+        ? `a,${param}`
+        : param
+
+      let [dst, src] = adjustedParam.split(/,/)
+
+      if ((src.length === 1) || (src.length === 3)) {
+        // register direct (not memory pointer or relative)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => this.#cp8(this.#regops.${dst}(), this.#regops.${src}())\n`
+        break
+      }
+
+      if (src === 'nn') {
+        // against value in (pc)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => this.#cp8(this.#regops.${dst}(), this.#getPC())\n`
+        break
+      }
+
+      if (src.match(/\(.{2,3}\)/)) {
+        src = src.replace(/[()]/g, '')
+        // against value in (reg)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+          `this.#opcodes[${opcode}] = () => this.#cp8(this.#regops.${dst}(), this.#ram[this.#regops.${src}()])\n`
+        break
+      }
+
+      console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
+      break
+    }
 
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
