@@ -736,6 +736,20 @@ splitInput.forEach((line) => {
       console.warn(`unhandled ${mnemonic} param: ${mnenonic} ${param}`)
       break
 
+    case 'cpl':
+      // invert each bit in accumulator; leak f3 & f5, set n & h, retain cpzs
+      outputBuffer += `// ${mnemonic}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.a(this.#regops.a() ^ 0xff)\n` +
+        `  this.#regops.f(\n` +
+        `      this.#regops.f()\n` +
+        `    & (this.#FREG_C | this.#FREG_P | this.#FREG_Z | this.#FREG_S)\n` +
+        `    | (this.regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+        `    | this.#FREG_N | this.#FREG_H\n` +
+        `  )\n` +
+        `}\n`
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
