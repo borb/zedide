@@ -189,7 +189,7 @@ class ProcessorZ80
 
   // ...also PK's SUB with subtle changes
   #sub8 = (value1, value2) => {
-    let [underflowedResult, finalResult] = [value1 - value2, this.#subWord(value1, value2)]
+    let [underflowedResult, finalResult] = [this.#subWord(value1, value2), this.#subByte(value1, value2)]
     let hcsLookup = ((value1 & 0x88) >> 3) |
                     ((value2 & 0x88) >> 2) |
                     ((underflowedResult & 0x88) >> 1)
@@ -203,7 +203,7 @@ class ProcessorZ80
       this.#flagTable.sz53[value1]
     )
 
-    return finalResult & 0xff
+    return finalResult
   }
 
   /**
