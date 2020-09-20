@@ -750,7 +750,7 @@ splitInput.forEach((line) => {
         `}\n`
       break
 
-    case 'and':
+    case 'and': {
       // bitwise and on a register, storing result in the first register (accumulator)
       // always sets h flag; every other flag is affected. trust nothing!
       let adjustedParam = (param === 'nn')
@@ -792,6 +792,51 @@ splitInput.forEach((line) => {
 
       console.warn(`unhandled and param: ${mnemonic} ${param}`)
       break
+    }
+
+    case 'xor': {
+      // bitwise xor on a register, storing result in the first register (accumulator)
+      // every flag is affected
+      let adjustedParam = (param === 'nn')
+        ? 'a,nn'
+        : param
+
+      let [dst, src] = adjustedParam.split(/,/)
+
+      if (dst.length === 1 && ((src.length === 1) || (src.length === 3))) {
+        // src is register (three letter registers are ixh/ixl/iyh/iyl)
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ^ this.#regops.${src}())\n` +
+        `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
+        `}\n`
+        break
+      }
+
+      if (src === 'nn') {
+        // src is a byte following the opcode
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ^ this.#getPC())\n` +
+        `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
+        `}\n`
+        break
+      }
+
+      if (src.match(/\(..\)/)) {
+        // src is read from a location by register
+        src = src.replace(/[()]/g, '')
+        outputBuffer += `// ${mnemonic} ${param}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ^ this.#ram[this.#regops.${src}()])\n` +
+        `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
+        `}\n`
+        break
+      }
+
+      console.warn(`unhandled xor param: ${mnemonic} ${param}`)
+      break
+    }
 
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
