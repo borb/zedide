@@ -843,6 +843,15 @@ splitInput.forEach((line) => {
       break
     }
 
+    case 'rst':
+      // push the pc location following rst onto the stack and set pc to the mnemonic-prefilled address
+      outputBuffer += `// ${mnemonic} ${param}\n` +
+        `this.#opcodes[${opcode}] = () => {\n` +
+        `  this.#pushWord(this.#registers.pc)\n` +
+        `  this.#registers.pc = 0x${param}\n` +
+        `}\n`
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
