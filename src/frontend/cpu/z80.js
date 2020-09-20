@@ -210,9 +210,7 @@ class ProcessorZ80
    * @param number  value Value to fetch 8 MSBs from
    * @return number
    */
-  #hi = (value) => {
-    return (value & 0xff00) >> 8
-  }
+  #hi = (value) => (value & 0xff00) >> 8
 
   /**
    * Get the lower byte of a number (MSB)
@@ -220,9 +218,7 @@ class ProcessorZ80
    * @param number  value Value to fetch 8 LSBs from
    * @return number
    */
-  #lo = (value) => {
-    return (value & 0x00ff) // no shift needed, it's the lsb already
-  }
+  #lo = (value) => (value & 0x00ff) // no shift needed, it's the lsb already
 
   /**
    * Create a word (16-bit value) from two bytes
@@ -231,9 +227,7 @@ class ProcessorZ80
    * @param number low  Low byte for word
    * @return number
    */
-  #word = (high, low) => {
-    return (high << 8) | low
-  }
+  #word = (high, low) => (high << 8) | low
 
   /**
    * Add two bytes
@@ -242,9 +236,7 @@ class ProcessorZ80
    * @param number  value Number to add
    * @return number
    */
-  #addByte = (base, value) => {
-    return (base + value) & 0xff
-  }
+  #addByte = (base, value) => (base + value) & 0xff
 
   /**
    * Add two words
@@ -253,9 +245,7 @@ class ProcessorZ80
    * @param number  value Number to add
    * @return number
    */
-  #addWord = (base, value) => {
-    return (base + value) & 0xffff
-  }
+  #addWord = (base, value) => (base + value) & 0xffff
 
   /**
    * Subtract two bytes
@@ -264,9 +254,7 @@ class ProcessorZ80
    * @param number  value Number to sub
    * @return number
    */
-  #subByte = (base, value) => {
-    return (base - value) & 0xff
-  }
+  #subByte = (base, value) => (base - value) & 0xff
 
   /**
    * Subtract two words
@@ -275,9 +263,7 @@ class ProcessorZ80
    * @param number  value Number to sub
    * @return number
    */
-  #subWord = (base, value) => {
-    return (base - value) & 0xffff
-  }
+  #subWord = (base, value) => (base - value) & 0xffff
 
   /**
    * Put a byte on the stack
