@@ -68,22 +68,29 @@ try {
 // if supplied, replace the word REGISTER with the actual register for the table in the input data
 if (typeof register !== 'undefined') {
   input = input.toString().replace(/REGISTER/g, register)
-  console.log(input)
 }
 
-let splitInput = input.toString().split(/\n/).filter((line) => {
-  // drop empty lines and comments
-  if (line === '')
-    return false
-  if (line[0] === '#')
-    return false
-  return true
-})
+// drop empty lines and comments
+let splitInput = input.toString().split(/\n/).filter(
+  (line) => ((line === '') || (line[0] === '#'))
+    ? false
+    : true
+)
 
 let outputBuffer = ''
 let unhandled = {}
 
 splitInput.forEach((line) => {
+  /**
+   * FIXUPS! although hacky to look at, some of the 0x[df]dcb ops are recorded in opcodes as ld instructions
+   * whilst they DO perform ld type operations (by setting bits in data then storing in a register), this would
+   * mean excessive branching off of the ld case; let's reformat so they look like bit ops with a third parameter
+   * (which should be a first parameter really); we'll cope with this in the handling
+   */
+  let fixup = line.match(/^(0x..) LD (.),((RLC|RRC|RL|RR|SLA|SRA|SLL|SRL|RES|SET) .*)$/)
+  if (fixup)
+    line = `${fixup[1]} ${fixup[3]},${fixup[2]}`
+
   // each opcode line is in the format:
   // <byte> <instruction> <argument>
   // argument can be a number of things, we will branch accordingly (and parse accordingly)
