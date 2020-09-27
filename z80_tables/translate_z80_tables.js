@@ -949,6 +949,201 @@ splitInput.forEach((line) => {
       break
     }
 
+    case 'rlc':
+      // rotate left & carry 7 (to FREG_C and bit 0); incorporate carry flag if
+      // affects all flags; c as above, sz53p by table values
+
+      if (byteRegMatch(param)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.${param}(((this.#regops.${param}() << 1) | (this.#regops.${param}() >> 7)) & 0xff)\n` +
+          `  this.#regops.f(\n` +
+          `      ((this.#regops.${param}() & 0x01) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#regops.${param}()]\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
+      if (param.match(/\(..\)/)) {
+        // from memory via register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  let address = this.#word(hi, lo)\n` +
+          `  this.#ram[address] = ((this.#ram[address] << 1) | (this.#ram[address] >> 7)) & 0xff\n` +
+          `  this.#regops.f(\n` +
+          `      ((this.#ram[address] & 0x01) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#ram[address]]\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled rlc param: ${mnemonic} ${param}`)
+      break
+
+    case 'rl':
+      // rotate left & and incorporate carry flag if set; bit 7 is lost from the product
+      // affects all flags; c as above, sz53p by table values
+
+      if (byteRegMatch(param)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${param}(((this.#regops.${param}() << 1) | (carry ? 0x01 : 0x00)) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (param.match(/\(..\)/)) {
+        // from memory via register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  let address = this.#word(hi, lo)\n` +
+          `  let carry = (this.#ram[address] & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#ram[address] = ((this.#ram[address] << 1) | (carry ? 0x01: 0x00)) & 0xff\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled rl param: ${mnemonic} ${param}`)
+      break
+
+    case 'rrc':
+      // rotate right & carry 0 (to FREG_C and bit 7)
+      // affects all flags; c as above, sz53p by table values
+
+      if (byteRegMatch(param)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.${param}(((this.#regops.${param}() << 7) | (this.#regops.${param}() >> 1)) & 0xff)\n` +
+          `  this.#regops.f(\n` +
+          `      ((this.#regops.${param}() & 0x80) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#regops.${param}()]\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
+      if (param.match(/\(..\)/)) {
+        // from memory via register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  let address = this.#word(hi, lo)\n` +
+          `  this.#ram[address] = ((this.#ram[address] << 7) | (this.#ram[address] >> 1)) & 0xff\n` +
+          `  this.#regops.f(\n` +
+          `      ((this.#ram[address] & 0x80) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#ram[address]]\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled rrc param: ${mnemonic} ${param}`)
+      break
+
+    case 'rr':
+      // rotate right & and incorporate carry flag; bit 0 is lost from the product
+      // affects all flags; c as above, sz53p by table values
+
+      if (byteRegMatch(param)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${param}(((this.#regops.${param}() >> 1) | (carry ? 0x80 : 0x00)) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (param.match(/\(..\)/)) {
+        // from memory via register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  let address = this.#word(hi, lo)\n` +
+          `  let carry = (this.#ram[address] & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#ram[address] = ((this.#ram[address] >> 1) | (carry ? 0x80 : 0x00)) & 0xff\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled rr param: ${mnemonic} ${param}`)
+      break
+
+    case 'sla':
+    case 'sll':
+      // shift left, copy bit 7 to carry flag
+      // flags as rl/rlc/rr/rrc
+
+      if (byteRegMatch(param)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${param}(((this.#regops.${param}() << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (param.match(/\(..\)/)) {
+        // from memory via register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  let address = this.#word(hi, lo)\n` +
+          `  let carry = (this.#ram[address] & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#ram[address] = ((this.#ram[address] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
+      break
+
+    case 'sra':
+    case 'srl':
+      // sla but right
+
+      if (byteRegMatch(param)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${param}(((this.#regops.${param}() >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (param.match(/\(..\)/)) {
+        // from memory via register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  let address = this.#word(hi, lo)\n` +
+          `  let carry = (this.#ram[address] & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#ram[address] = ((this.#ram[address] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
