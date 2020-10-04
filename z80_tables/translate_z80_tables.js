@@ -1140,7 +1140,7 @@ splitInput.forEach((line) => {
       console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
       break
 
-    case 'bit':
+    case 'bit': {
       // test bit N of register/memory and affect flags
       // as with most ops, f3 and f5 leak out of the tested register; c is retained, h is set
       // if the bit is NOT set, p and z are set
@@ -1178,6 +1178,33 @@ splitInput.forEach((line) => {
 
       console.warn(`unhandled bit param: ${mnemonic} ${param}`)
       break
+    }
+
+    case 'set':
+    case 'res': {
+      // set/reset (clear) bit N of register/memory. flags unaffected. & with inverted bitmap should suffice for reset.
+      const [bit, testSubject] = param.split(/,/)
+
+      if (byteRegMatch(testSubject)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => this.#regops.${testSubject}(this.#regops.${testSubject}() & ${(mnemonic === 'res') ? '~' : ''}(1 << ${bit}))\n`
+        break
+      }
+
+      if (testSubject.match(/\(..\)/)) {
+        // address mode
+        const register = testSubject.replace(/[()]/g, '')
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#ram[this.#regops.${register}()] = this.#ram[this.#regops.${register}()] & ${(mnemonic === 'res') ? '~' : ''}(1 << ${bit})\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
+      break
+    }
 
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
