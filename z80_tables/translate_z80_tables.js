@@ -1140,6 +1140,45 @@ splitInput.forEach((line) => {
       console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
       break
 
+    case 'bit':
+      // test bit N of register/memory and affect flags
+      // as with most ops, f3 and f5 leak out of the tested register; c is retained, h is set
+      // if the bit is NOT set, p and z are set
+
+      let [bit, testSubject] = param.split(/,/)
+
+      if (byteRegMatch(testSubject)) {
+        // test subject is a register
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.f(\n` +
+          `      (this.#regops.f() & this.#FREG_C)\n` +
+          `    | this.#FREG_H\n` +
+          `    | (this.#regops.${testSubject}() & (this.#FREG_F3 | this.#FREG_F5))\n` +
+          `    | (((this.#regops.${testSubject}() & (1 << ${bit})) === 0) ? (this.#FREG_P | this.#FREG_Z) : 0)\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
+      if (testSubject.match(/\(..\)/)) {
+        // test subject is a memory location by register
+        const register = testSubject.replace(/[()]/g, '')
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.f(\n` +
+          `      (this.#regops.f() & this.#FREG_C)\n` +
+          `    | this.#FREG_H\n` +
+          `    | (this.#ram[this.#regops.${register}()] & (this.#FREG_F3 | this.#FREG_F5))\n` +
+          `    | (((this.#ram[this.#regops.${register}()] & (1 << ${bit})) === 0) ? (this.#FREG_P | this.#FREG_Z) : 0)\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled bit param: ${mnemonic} ${param}`)
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
