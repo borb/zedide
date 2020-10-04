@@ -73,7 +73,7 @@ if (typeof register !== 'undefined') {
 }
 
 // drop empty lines and comments
-let splitInput = input.toString().split(/\n/).filter(
+const splitInput = input.toString().split(/\n/).filter(
   (line) => ((line === '') || (line[0] === '#'))
     ? false
     : true
@@ -135,52 +135,52 @@ splitInput.forEach((line) => {
 
       if (wordRegMatch(parts[0]) && parts[1] == 'nnnn') {
         // simple word load
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#word(hi, lo))\n}\n`
+        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#word(hi, lo))\n}\n`
         break
       }
 
       if (parts[0] == '(nnnn)' && byteRegMatch(parts[1])) {
         // write byte register to memory
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#ram[this.#word(hi, lo)] = this.#regops.${parts[1]}()\n}\n`
+        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#ram[this.#word(hi, lo)] = this.#regops.${parts[1]}()\n}\n`
         break
       }
 
       if (parts[0] == '(nnnn)' && wordRegMatch(parts[1])) {
         // write word register to memory
-        let [msb, lsb] = parts[1].split('')
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#ram[this.#word(hi, lo)] = this.#regops.${lsb}()\n  this.#ram[this.#addWord(this.#word(hi, lo), 1)] = this.#regops.${msb}()\n}\n`
+        const [msb, lsb] = parts[1].split('')
+        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#ram[this.#word(hi, lo)] = this.#regops.${lsb}()\n  this.#ram[this.#addWord(this.#word(hi, lo), 1)] = this.#regops.${msb}()\n}\n`
         break
       }
 
       if (byteRegMatch(parts[0]) && parts[1] == '(nnnn)') {
         // load memory to byte register
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#ram[this.#word(hi, lo)])\n}\n`
+        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#ram[this.#word(hi, lo)])\n}\n`
         break
       }
 
       if (wordRegMatch(parts[0]) && parts[1] == '(nnnn)') {
         // load memory to word register
-        let [msb, lsb] = parts[1].split('')
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${lsb}(this.#ram[this.#word(hi, lo)])\n  this.#regops.${msb}(this.#ram[this.#addWord(this.#word(hi, lo), 1)])\n}\n`
+        const [msb, lsb] = parts[1].split('')
+        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${lsb}(this.#ram[this.#word(hi, lo)])\n  this.#regops.${msb}(this.#ram[this.#addWord(this.#word(hi, lo), 1)])\n}\n`
         break
       }
 
       if (parts[0].match(/\(..\)/) && parts[1] == 'nn') {
-        let register = parts[0].replace(/[()]/g, '')
+        const register = parts[0].replace(/[()]/g, '')
         // write byte to memory by register
         outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#ram[this.#regops.${register}()] = this.#getPC() }\n`
         break
       }
 
       if (parts[0].match(/\(..\)/) && byteRegMatch(parts[1])) {
-        let register = parts[0].replace(/[()]/g, '')
+        const register = parts[0].replace(/[()]/g, '')
         // write 8-bit register to memory by register
         outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#ram[this.#regops.${register}()] = this.#regops.${parts[1]}() }\n`
         break
       }
 
       if (byteRegMatch(parts[0]) && parts[1].match(/\(..\)/)) {
-        let register = parts[1].replace(/[()]/g, '')
+        const register = parts[1].replace(/[()]/g, '')
         // load 8-bit register from memory by register
         outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#ram[this.#regops.${register}()]) }\n`
         break
@@ -192,7 +192,7 @@ splitInput.forEach((line) => {
 
     case 'exx':
       // swap bc, de, hl with bc', de', hl'
-      outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  let [bc, de, hl] = [this.#regops.bc(), this.#regops.de(), this.#regops.hl()]\n  this.#regops.bc(this.#regops.bc2())\n  this.#regops.de(this.#regops.de2())\n  this.#regops.hl(this.#regops.hl2())\n  this.#regops.bc2(bc)\n  this.#regops.de2(de)\n  this.#regops.hl2(hl)\n}\n`
+      outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [bc, de, hl] = [this.#regops.bc(), this.#regops.de(), this.#regops.hl()]\n  this.#regops.bc(this.#regops.bc2())\n  this.#regops.de(this.#regops.de2())\n  this.#regops.hl(this.#regops.hl2())\n  this.#regops.bc2(bc)\n  this.#regops.de2(de)\n  this.#regops.hl2(hl)\n}\n`
       break
 
     case 'ex':
@@ -205,7 +205,7 @@ splitInput.forEach((line) => {
         reg2 = reg2.replace(/^af'$/, 'af2')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let temp = this.#regops.${reg1}()\n` +
+          `  const temp = this.#regops.${reg1}()\n` +
           `  this.#regops.${reg1}(this.#regops.${reg2}())\n` +
           `  this.#regops.${reg2}(temp)\n` +
           `}\n`
@@ -217,8 +217,8 @@ splitInput.forEach((line) => {
         reg1 = reg1.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let temp = this.#registers.${reg2}\n` +
-          `  let [lo, hi] = [this.#ram[this.#registers.${reg1}], this.#ram[this.#addWord(this.#registers.${reg1}, 1)]]\n` +
+          `  const temp = this.#registers.${reg2}\n` +
+          `  const [lo, hi] = [this.#ram[this.#registers.${reg1}], this.#ram[this.#addWord(this.#registers.${reg1}, 1)]]\n` +
           `  this.#registers.${reg2} = this.#word(hi, lo)\n` +
           `  this.#ram[this.#registers.${reg1}] = this.#lo(temp)\n` +
           `  this.#ram[this.#addWord(this.#registers.${reg1}, 1)] = this.#hi(temp)\n` +
@@ -341,8 +341,8 @@ splitInput.forEach((line) => {
           // increment 8-bit value in memory
           outputBuffer += `// ${verbatimOp}\n` +
             `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-            `  let old = this.#ram[this.#registers.hl]\n` +
-            `  let new = this.#addByte(old, 1)\n` +
+            `  const old = this.#ram[this.#registers.hl]\n` +
+            `  const new = this.#addByte(old, 1)\n` +
             `  this.#ram[this.#registers.hl] = new\n` +
             `  this.#regops.f(\n` +
             `      this.#regops.f()\n` +
@@ -390,7 +390,7 @@ splitInput.forEach((line) => {
           // again, thanks to philip kendall; flag handling ported from fuse's z80_macros.h
           outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let old = this.#regops.${param}()\n` +
+          `  const old = this.#regops.${param}()\n` +
           `  this.#regops.${param}(this.#subByte(this.#regops.${param}(), 1))\n` +
           `  this.#regops.f(\n` +
           `      this.#regops.f()\n` +
@@ -407,8 +407,8 @@ splitInput.forEach((line) => {
           // decrement 8-bit value in memory
           outputBuffer += `// ${verbatimOp}\n` +
             `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-            `  let old = this.#ram[this.#registers.hl]\n` +
-            `  let new = this.#subByte(old, 1)\n` +
+            `  const old = this.#ram[this.#registers.hl]\n` +
+            `  const new = this.#subByte(old, 1)\n` +
             `  this.#ram[this.#registers.hl] = new\n` +
             `  this.#regops.f(\n` +
             `      this.#regops.f()\n` +
@@ -431,13 +431,13 @@ splitInput.forEach((line) => {
     case 'jp':
       // call: call a subroutine (put pc on the stack so we can use ret)
       // jp: jump to another program location (change the pc to new location)
-      let pushReturnAddress = (mnemonic == 'call')
+      const pushReturnAddress = (mnemonic == 'call')
         ? '  this.#pushWord(this.#registers.pc)\n'
         : ''
 
       if (param == 'nnnn') {
         // unconditional
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes.[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#registers.pc = this.#word(hi, lo)\n${pushReturnAddress}}\n`
+        outputBuffer += `// ${verbatimOp}\nthis.#opcodes.[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#registers.pc = this.#word(hi, lo)\n${pushReturnAddress}}\n`
         break
       }
 
@@ -447,7 +447,7 @@ splitInput.forEach((line) => {
         break
       }
 
-      let [flagOp] = param.split(/,/)
+      const [flagOp] = param.split(/,/)
 
       // leave early so we can shortcut the outputBuffer concat and save code
       // we do this because we ALWAYS need to pull the call address from pc&pc++,
@@ -457,7 +457,7 @@ splitInput.forEach((line) => {
         break
       }
 
-      outputBuffer += `// ${verbatimOp}\nthis.#opcodes.[${opcode}] = () => {\n  let [lo, hi] = [this.#getPC(), this.#getPC()]\n  `
+      outputBuffer += `// ${verbatimOp}\nthis.#opcodes.[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  `
       switch (flagOp) {
         case 'z':
         case 'c':
@@ -631,8 +631,8 @@ splitInput.forEach((line) => {
       // roll left, swapping the carry flag out
       outputBuffer += `// ${verbatimOp}\n` +
         `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-        `  let carry = (this.#regops.f() & this.#FREG_C) ? 0x01 : 0x00\n` +
-        `  let newCarry = (this.#regops.a() & 0x80) ? this.#FREG_C : 0\n` +
+        `  const carry = (this.#regops.f() & this.#FREG_C) ? 0x01 : 0x00\n` +
+        `  const newCarry = (this.#regops.a() & 0x80) ? this.#FREG_C : 0\n` +
         `  this.#regops.a(this.#lo((this.#regops.a() << 1) | carry)\n` +
         `  this.#regops.f(\n` +
         `    (this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S))\n` +
@@ -661,8 +661,8 @@ splitInput.forEach((line) => {
       // roll right, swapping carry flag out
       outputBuffer += `// ${verbatimOp}\n` +
         `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-        `  let carry = (this.#regops.f() & this.#FREG_C) ? 0x80 : 0x00\n` +
-        `  let newCarry = (this.#regops.a() & 0x01) ? this.#FREG_C : 0\n` +
+        `  const carry = (this.#regops.f() & this.#FREG_C) ? 0x80 : 0x00\n` +
+        `  const newCarry = (this.#regops.a() & 0x01) ? this.#FREG_C : 0\n` +
         `  this.#regops.a(this.#lo((this.#regops.a() >> 1) | carry)\n` +
         `  this.#regops.f(\n` +
         `    (this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S))\n` +
@@ -687,7 +687,7 @@ splitInput.forEach((line) => {
       // dec b, if it's not zero, jump to pc+offset (signed)
       outputBuffer += `// ${verbatimOp}\n` +
         `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-        `  let [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
+        `  const [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
         `  this.#regops.b(this.#sub8(this.#regops.b(), 1))\n` +
         `  if (this.#regops.b())\n` +
         `    this.#registers.pc = this.#addWord(instructionBase, this.#uint8ToInt8(offset))\n` +
@@ -701,13 +701,13 @@ splitInput.forEach((line) => {
         // unconditional
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
+          `  const [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
           `  this.#registers.pc = this.#addWord(instructionBase, this.#uint8ToInt8(offset))\n` +
         `}\n`
         break
       }
 
-      let [flag] = param.split(/,/)
+      const [flag] = param.split(/,/)
       let condition = ''
 
       // should be between c, nc, z, nz now
@@ -738,7 +738,7 @@ splitInput.forEach((line) => {
 
       outputBuffer += `// ${verbatimOp}\n` +
         `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-        `  let [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
+        `  const [offset, instructionBase] = [this.#getPC(), this.#registers.pc - 2]\n` +
         `  if (${condition})\n` +
         `    this.#registers.pc = this.#addWord(instructionBase, this.#uint8ToInt8(offset))\n` +
         `}\n`
@@ -750,7 +750,7 @@ splitInput.forEach((line) => {
       // ported from fuse owing to not being sure how the BCD opcodes work
       outputBuffer += `// ${verbatimOp}\n` +
         `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-        `  let [add, carry] = [0, this.#regops.f() & this.#FREG_C]\n` +
+        `  const [add, carry] = [0, this.#regops.f() & this.#FREG_C]\n` +
         `  \n` +
         `  if ((this.#regops.f() & this.#FREG_H) || ((this.#regops.a() & 0x0f) > 9))\n` +
         `    add = 6\n` +
@@ -814,7 +814,7 @@ splitInput.forEach((line) => {
     case 'and': {
       // bitwise and on a register, storing result in the first register (accumulator)
       // always sets h flag; every other flag is affected. trust nothing!
-      let adjustedParam = (param === 'nn')
+      const adjustedParam = (param === 'nn')
         ? 'a,nn'
         : param
 
@@ -859,11 +859,11 @@ splitInput.forEach((line) => {
     case 'xor': {
       // bitwise or/xor on a register, storing result in the first register (accumulator)
       // every flag is affected
-      let adjustedParam = (param === 'nn')
+      const adjustedParam = (param === 'nn')
         ? 'a,nn'
         : param
 
-      let bitwiseOp = (mnemonic === 'or')
+      const bitwiseOp = (mnemonic === 'or')
         ? '|'
         : '^'
 
@@ -919,7 +919,7 @@ splitInput.forEach((line) => {
 
       // fixup to retain consistency with the ix/iy/register relative ops
       // bit silly, since it's all on the accumulator anyway
-      let adjustedParam = (param.indexOf(',') === -1)
+      const adjustedParam = (param.indexOf(',') === -1)
         ? `a,${param}`
         : param
 
@@ -993,7 +993,7 @@ splitInput.forEach((line) => {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
           `  this.#regops.${param}(((this.#regops.${param}() << 1) | (carry ? 0x01 : 0x00)) & 0xff)\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
           `}\n`
@@ -1005,7 +1005,7 @@ splitInput.forEach((line) => {
         const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
           `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1) | (carry ? 0x01: 0x00)) & 0xff\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
@@ -1057,7 +1057,7 @@ splitInput.forEach((line) => {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
           `  this.#regops.${param}(((this.#regops.${param}() >> 1) | (carry ? 0x80 : 0x00)) & 0xff)\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
           `}\n`
@@ -1069,7 +1069,7 @@ splitInput.forEach((line) => {
         const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
           `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] >> 1) | (carry ? 0x80 : 0x00)) & 0xff\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
@@ -1088,7 +1088,7 @@ splitInput.forEach((line) => {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
           `  this.#regops.${param}(((this.#regops.${param}() << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff)\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
           `}\n`
@@ -1100,7 +1100,7 @@ splitInput.forEach((line) => {
         const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
           `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
@@ -1118,7 +1118,7 @@ splitInput.forEach((line) => {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
           `  this.#regops.${param}(((this.#regops.${param}() >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff)\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
           `}\n`
@@ -1130,7 +1130,7 @@ splitInput.forEach((line) => {
         const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
+          `  const carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
           `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
@@ -1145,7 +1145,7 @@ splitInput.forEach((line) => {
       // as with most ops, f3 and f5 leak out of the tested register; c is retained, h is set
       // if the bit is NOT set, p and z are set
 
-      let [bit, testSubject] = param.split(/,/)
+      const [bit, testSubject] = param.split(/,/)
 
       if (byteRegMatch(testSubject)) {
         // test subject is a register
