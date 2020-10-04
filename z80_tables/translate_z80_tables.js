@@ -970,14 +970,13 @@ splitInput.forEach((line) => {
 
       if (param.match(/\(..\)/)) {
         // from memory via register
+        const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
-          `  let address = this.#word(hi, lo)\n` +
-          `  this.#ram[address] = ((this.#ram[address] << 1) | (this.#ram[address] >> 7)) & 0xff\n` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1) | (this.#ram[this.#regops.${register}()] >> 7)) & 0xff\n` +
           `  this.#regops.f(\n` +
-          `      ((this.#ram[address] & 0x01) ? this.#FREG_C : 0)\n` +
-          `    | this.#flagTable.sz53p[this.#ram[address]]\n` +
+          `      ((this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]]\n` +
           `  )\n` +
           `}\n`
         break
@@ -1003,13 +1002,12 @@ splitInput.forEach((line) => {
 
       if (param.match(/\(..\)/)) {
         // from memory via register
+        const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
-          `  let address = this.#word(hi, lo)\n` +
-          `  let carry = (this.#ram[address] & 0x80) ? this.#FREG_C : 0\n` +
-          `  this.#ram[address] = ((this.#ram[address] << 1) | (carry ? 0x01: 0x00)) & 0xff\n` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `  let carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1) | (carry ? 0x01: 0x00)) & 0xff\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
         break
       }
@@ -1036,14 +1034,13 @@ splitInput.forEach((line) => {
 
       if (param.match(/\(..\)/)) {
         // from memory via register
+        const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
-          `  let address = this.#word(hi, lo)\n` +
-          `  this.#ram[address] = ((this.#ram[address] << 7) | (this.#ram[address] >> 1)) & 0xff\n` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 7) | (this.#ram[this.#regops.${register}()] >> 1)) & 0xff\n` +
           `  this.#regops.f(\n` +
-          `      ((this.#ram[address] & 0x80) ? this.#FREG_C : 0)\n` +
-          `    | this.#flagTable.sz53p[this.#ram[address]]\n` +
+          `      ((this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]]\n` +
           `  )\n` +
           `}\n`
         break
@@ -1069,13 +1066,12 @@ splitInput.forEach((line) => {
 
       if (param.match(/\(..\)/)) {
         // from memory via register
+        const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
-          `  let address = this.#word(hi, lo)\n` +
-          `  let carry = (this.#ram[address] & 0x01) ? this.#FREG_C : 0\n` +
-          `  this.#ram[address] = ((this.#ram[address] >> 1) | (carry ? 0x80 : 0x00)) & 0xff\n` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `  let carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] >> 1) | (carry ? 0x80 : 0x00)) & 0xff\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
         break
       }
@@ -1101,13 +1097,12 @@ splitInput.forEach((line) => {
 
       if (param.match(/\(..\)/)) {
         // from memory via register
+        const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
-          `  let address = this.#word(hi, lo)\n` +
-          `  let carry = (this.#ram[address] & 0x80) ? this.#FREG_C : 0\n` +
-          `  this.#ram[address] = ((this.#ram[address] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `  let carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
         break
       }
@@ -1132,13 +1127,12 @@ splitInput.forEach((line) => {
 
       if (param.match(/\(..\)/)) {
         // from memory via register
+        const register = param.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  let [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
-          `  let address = this.#word(hi, lo)\n` +
-          `  let carry = (this.#ram[address] & 0x01) ? this.#FREG_C : 0\n` +
-          `  this.#ram[address] = ((this.#ram[address] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[address]])\n` +
+          `  let carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
           `}\n`
         break
       }
