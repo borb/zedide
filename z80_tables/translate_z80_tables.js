@@ -895,6 +895,7 @@ splitInput.forEach((line) => {
 
     case 'in':
     case 'out':
+      // @todo need to set sz53p flags & retain carry
       // input/output
       const [arg1, arg2] = param.split(/,/)
 
@@ -908,6 +909,32 @@ splitInput.forEach((line) => {
           : `  this.#callIoHandler(this.#getPC(), 'w', this.#regops.${arg2}())`
 
         outputBuffer += `\n}\n`
+        break
+      }
+
+      if ((byteRegMatch(arg1) && byteRegMatch(arg2.replace(/[()]/g, ''))) || (byteRegMatch(arg1.replace(/[()]/g, '')) && byteRegMatch(arg2))) {
+        // port number is in register
+        const portRegister = (mnemonic === 'in') ? arg2.substring(1, 2) : arg1.substring(1, 2)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n`
+
+        outputBuffer += mnemonic == 'in'
+          ? `  this.#regops.${arg1}(this.#callIoHandler(this.#regops.${portRegister}(), 'r'))`
+          : `  this.#callIoHandler(this.#regops.${portRegister}(), 'w', this.#regops.${arg2}())`
+
+        outputBuffer += `\n}\n`
+        break
+      }
+
+      if ((arg1 === 'f') && byteRegMatch(arg2.replace(/[()]/g, ''))) {
+        // read and affect flags only (usually only on register c)
+        const portRegister = arg2.substring(1, 2)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.${arg1}(this.#callIoHandler(this.#regops.${portRegister}(), 'r'))\n` +
+          `  this.#regops.f((this.#regops.f() & this.#FREG_C) | this.#flagTables.sz53p[this.#regops.${portRegister}()])` +
+          `}\n`
+
         break
       }
 
