@@ -1083,26 +1083,47 @@ splitInput.forEach((line) => {
     case 'sll':
       // shift left, copy bit 7 to carry flag
       // flags as rl/rlc/rr/rrc
+      const [subject, dst] = param.split(/,/)
 
-      if (byteRegMatch(param)) {
+      if (byteRegMatch(subject)) {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  const carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
-          `  this.#regops.${param}(((this.#regops.${param}() << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff)\n` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `  const carry = (this.#regops.${subject}() & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${subject}(((this.#regops.${subject}() << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${subject}()])\n` +
           `}\n`
         break
       }
 
-      if (param.match(/\(..\)/)) {
+      if (subject.match(/\(..\)/)) {
         // from memory via register
-        const register = param.replace(/[()]/g, '')
+        const register = subject.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  const carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
-          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
+          `}\n`
+        break
+      }
+
+      if (subject.match(/\(..\+dd\)/)) {
+        // from memory via register plus offset
+        const indirParam = subject.match(/\((..)\+dd\)/)
+
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
+
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  const carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
+          `  ${secondAssignment}this.#ram[location] = ((this.#ram[location] << 1)${mnemonic === 'sll' ? ' | 0x01' : ''}) & 0xff${secondAssignment ? ')' : ''}\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[location]])\n` +
           `}\n`
         break
       }
@@ -1111,34 +1132,56 @@ splitInput.forEach((line) => {
       break
 
     case 'sra':
-    case 'srl':
+    case 'srl': {
       // sla but right
+      const [subject, dst] = param.split(/,/)
 
-      if (byteRegMatch(param)) {
+      if (byteRegMatch(subject)) {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  const carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
-          `  this.#regops.${param}(((this.#regops.${param}() >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff)\n` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `  const carry = (this.#regops.${subject}() & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${subject}(((this.#regops.${subject}() >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${subject}()])\n` +
           `}\n`
         break
       }
 
-      if (param.match(/\(..\)/)) {
+      if (subject.match(/\(..\)/)) {
         // from memory via register
-        const register = param.replace(/[()]/g, '')
+        const register = subject.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  const carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
-          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff` +
+          `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff\n` +
           `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[this.#regops.${register}()]])\n` +
+          `}\n`
+        break
+      }
+
+      if (subject.match(/\(..\+dd\)/)) {
+        // from memory via register plus offset
+        const indirParam = subject.match(/\((..)\+dd\)/)
+
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
+
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  const carry = (this.#ram[location] & 0x01) ? this.#FREG_C : 0\n` +
+          `  ${secondAssignment}this.#ram[location] = ((this.#ram[location] >> 1)${mnemonic === 'srl' ? ' | 0x80' : ''}) & 0xff${secondAssignment ? ')' : ''}\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[location]])\n` +
           `}\n`
         break
       }
 
       console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
       break
+    }
 
     case 'bit': {
       // test bit N of register/memory and affect flags
