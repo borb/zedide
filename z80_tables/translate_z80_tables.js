@@ -951,26 +951,27 @@ splitInput.forEach((line) => {
       break
     }
 
-    case 'rlc':
+    case 'rlc': {
       // rotate left & carry 7 (to FREG_C and bit 0); incorporate carry flag if
       // affects all flags; c as above, sz53p by table values
+      const [subject, dst] = param.split(/,/)
 
-      if (byteRegMatch(param)) {
+      if (byteRegMatch(subject)) {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  this.#regops.${param}(((this.#regops.${param}() << 1) | (this.#regops.${param}() >> 7)) & 0xff)\n` +
+          `  this.#regops.${subject}(((this.#regops.${subject}() << 1) | (this.#regops.${subject}() >> 7)) & 0xff)\n` +
           `  this.#regops.f(\n` +
-          `      ((this.#regops.${param}() & 0x01) ? this.#FREG_C : 0)\n` +
-          `    | this.#flagTable.sz53p[this.#regops.${param}()]\n` +
+          `      ((this.#regops.${subject}() & 0x01) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#regops.${subject}()]\n` +
           `  )\n` +
           `}\n`
         break
       }
 
-      if (param.match(/\(..\)/)) {
+      if (subject.match(/\(..\)/)) {
         // from memory via register
-        const register = param.replace(/[()]/g, '')
+        const register = subject.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 1) | (this.#ram[this.#regops.${register}()] >> 7)) & 0xff\n` +
@@ -982,27 +983,51 @@ splitInput.forEach((line) => {
         break
       }
 
-      console.warn(`unhandled rlc param: ${mnemonic} ${param}`)
-      break
+      if (subject.match(/\(..\+dd\)/)) {
+        // from memory via register plus offset
+        const indirParam = subject.match(/\((..)\+dd\)/)
 
-    case 'rl':
-      // rotate left & and incorporate carry flag if set; bit 7 is lost from the product
-      // affects all flags; c as above, sz53p by table values
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
 
-      if (byteRegMatch(param)) {
-        // register mode
         outputBuffer += `// ${verbatimOp}\n` +
-          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  const carry = (this.#regops.${param}() & 0x80) ? this.#FREG_C : 0\n` +
-          `  this.#regops.${param}(((this.#regops.${param}() << 1) | (carry ? 0x01 : 0x00)) & 0xff)\n` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  ${secondAssignment}this.#ram[location] = ((this.#ram[location] << 1) | (this.#ram[location] >> 7)) & 0xff${secondAssignment ? ')' : ''}\n` +
+          `  this.#regops.f(\n` +
+          `      ((this.#ram[location] & 0x01) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#ram[location]]\n` +
+          `  )\n` +
           `}\n`
         break
       }
 
-      if (param.match(/\(..\)/)) {
+      console.warn(`unhandled rlc param: ${mnemonic} ${param}`)
+      break
+    }
+
+    case 'rl': {
+      // rotate left & and incorporate carry flag if set; bit 7 is lost from the product
+      // affects all flags; c as above, sz53p by table values
+      const [subject, dst] = param.split(/,/)
+
+      if (byteRegMatch(subject)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const carry = (this.#regops.${subject}() & 0x80) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${subject}(((this.#regops.${subject}() << 1) | (carry ? 0x01 : 0x00)) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${subject}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (subject.match(/\(..\)/)) {
         // from memory via register
-        const register = param.replace(/[()]/g, '')
+        const register = subject.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  const carry = (this.#ram[this.#regops.${register}()] & 0x80) ? this.#FREG_C : 0\n` +
@@ -1012,29 +1037,51 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (subject.match(/\(..\+dd\)/)) {
+        // from memory via register plus offset
+        const indirParam = subject.match(/\((..)\+dd\)/)
+
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
+
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  const carry = (this.#ram[location] & 0x80) ? this.#FREG_C : 0\n` +
+          `  ${secondAssignment}this.#ram[location] = ((this.#ram[location] << 1) | (carry ? 0x01: 0x00)) & 0xff${secondAssignment ? ')' : ''}\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[location]])\n` +
+          `}\n`
+        break
+      }
+
       console.warn(`unhandled rl param: ${mnemonic} ${param}`)
       break
+    }
 
-    case 'rrc':
+    case 'rrc': {
       // rotate right & carry 0 (to FREG_C and bit 7)
       // affects all flags; c as above, sz53p by table values
+      const [subject, dst] = param.split(/,/)
 
-      if (byteRegMatch(param)) {
+      if (byteRegMatch(subject)) {
         // register mode
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  this.#regops.${param}(((this.#regops.${param}() << 7) | (this.#regops.${param}() >> 1)) & 0xff)\n` +
+          `  this.#regops.${subject}(((this.#regops.${subject}() << 7) | (this.#regops.${subject}() >> 1)) & 0xff)\n` +
           `  this.#regops.f(\n` +
-          `      ((this.#regops.${param}() & 0x80) ? this.#FREG_C : 0)\n` +
-          `    | this.#flagTable.sz53p[this.#regops.${param}()]\n` +
+          `      ((this.#regops.${subject}() & 0x80) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#regops.${subject}()]\n` +
           `  )\n` +
           `}\n`
         break
       }
 
-      if (param.match(/\(..\)/)) {
+      if (subject.match(/\(..\)/)) {
         // from memory via register
-        const register = param.replace(/[()]/g, '')
+        const register = subject.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  this.#ram[this.#regops.${register}()] = ((this.#ram[this.#regops.${register}()] << 7) | (this.#ram[this.#regops.${register}()] >> 1)) & 0xff\n` +
@@ -1046,27 +1093,51 @@ splitInput.forEach((line) => {
         break
       }
 
-      console.warn(`unhandled rrc param: ${mnemonic} ${param}`)
-      break
+      if (subject.match(/\(..\+dd\)/)) {
+        // from memory via register plus offset
+        const indirParam = subject.match(/\((..)\+dd\)/)
 
-    case 'rr':
-      // rotate right & and incorporate carry flag; bit 0 is lost from the product
-      // affects all flags; c as above, sz53p by table values
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
 
-      if (byteRegMatch(param)) {
-        // register mode
         outputBuffer += `// ${verbatimOp}\n` +
-          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
-          `  const carry = (this.#regops.${param}() & 0x01) ? this.#FREG_C : 0\n` +
-          `  this.#regops.${param}(((this.#regops.${param}() >> 1) | (carry ? 0x80 : 0x00)) & 0xff)\n` +
-          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${param}()])\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  ${secondAssignment}this.#ram[location] = ((this.#ram[location] << 7) | (this.#ram[location] >> 1)) & 0xff${secondAssignment ? ')' : ''}\n` +
+          `  this.#regops.f(\n` +
+          `      ((this.#ram[location] & 0x80) ? this.#FREG_C : 0)\n` +
+          `    | this.#flagTable.sz53p[this.#ram[location]]\n` +
+          `  )\n` +
           `}\n`
         break
       }
 
-      if (param.match(/\(..\)/)) {
+      console.warn(`unhandled rrc param: ${mnemonic} ${param}`)
+      break
+    }
+
+    case 'rr': {
+      // rotate right & and incorporate carry flag; bit 0 is lost from the product
+      // affects all flags; c as above, sz53p by table values
+      const [subject, dst] = param.split(/,/)
+
+      if (byteRegMatch(subject)) {
+        // register mode
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const carry = (this.#regops.${subject}() & 0x01) ? this.#FREG_C : 0\n` +
+          `  this.#regops.${subject}(((this.#regops.${subject}() >> 1) | (carry ? 0x80 : 0x00)) & 0xff)\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#regops.${subject}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (subject.match(/\(..\)/)) {
         // from memory via register
-        const register = param.replace(/[()]/g, '')
+        const register = subject.replace(/[()]/g, '')
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  const carry = (this.#ram[this.#regops.${register}()] & 0x01) ? this.#FREG_C : 0\n` +
@@ -1076,8 +1147,29 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (subject.match(/\(..\+dd\)/)) {
+        // from memory via register plus offset
+        const indirParam = subject.match(/\((..)\+dd\)/)
+
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
+
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  const carry = (this.#ram[location] & 0x01) ? this.#FREG_C : 0\n` +
+          `  ${secondAssignment}this.#ram[location] = ((this.#ram[location] >> 1) | (carry ? 0x80 : 0x00)) & 0xff${secondAssignment ? ')': ''}\n` +
+          `  this.#regops.f(carry | this.#flagTable.sz53p[this.#ram[location]])\n` +
+          `}\n`
+        break
+      }
+
       console.warn(`unhandled rr param: ${mnemonic} ${param}`)
       break
+    }
 
     case 'sla':
     case 'sll':
