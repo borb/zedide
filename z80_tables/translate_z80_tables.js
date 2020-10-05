@@ -197,6 +197,16 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (parts[0].match(/\(..\+dd\)/) && parts[1] == 'nn') {
+        const register = parts[0].substring(1, 3)
+        // write byte to memory by register indirect mode (dd byte before nn byte)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#ram[this.#regops.${register}() + this.#uint8ToInt8(this.#getPC())] = this.#getPC()\n` +
+          `}\n`
+        break
+      }
+
       if (parts[0].match(/\(..\)/) && byteRegMatch(parts[1])) {
         const register = parts[0].replace(/[()]/g, '')
         // write 8-bit register to memory by register
@@ -210,6 +220,26 @@ splitInput.forEach((line) => {
         // load 8-bit register from memory by register
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#ram[this.#regops.${register}()]) }\n`
+        break
+      }
+
+      if (byteRegMatch(parts[0]) && parts[1].match(/\(..\+dd\)/)) {
+        // indirect 8-bit read from register
+        const register = parts[1].substring(1, 3)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.${parts[0]}(this.#ram[this.#registers.${register} + this.#uint8ToInt8(this.#getPC())])\n` +
+          `}\n`
+        break
+      }
+
+      if (parts[0].match(/\(..\+dd\)/) && byteRegMatch(parts[1])) {
+        // store 8-bit register to indirect location
+        const register = parts[0].substring(1, 3)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#ram[this.#registers.${register} + this.#uint8ToInt8(this.#getPC())] = this.#regops.${parts[1]}()\n` +
+          `}\n`
         break
       }
 
