@@ -123,66 +123,93 @@ splitInput.forEach((line) => {
       if ((byteRegMatch(parts[0]) && byteRegMatch(parts[1]))
           || (wordRegMatch(parts[0]) && wordRegMatch(parts[1]))) {
         // simple byte/word register copy
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#regops.${parts[1]}()) }\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#regops.${parts[1]}()) }\n`
         break
       }
 
       if (byteRegMatch(parts[0]) && parts[1] == 'nn') {
         // simple byte load
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#getPC()) }\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#getPC()) }\n`
         break
       }
 
       if (wordRegMatch(parts[0]) && parts[1] == 'nnnn') {
         // simple word load
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#word(hi, lo))\n}\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  this.#regops.${parts[0]}(this.#word(hi, lo))\n` +
+          `}\n`
         break
       }
 
       if (parts[0] == '(nnnn)' && byteRegMatch(parts[1])) {
         // write byte register to memory
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#ram[this.#word(hi, lo)] = this.#regops.${parts[1]}()\n}\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  this.#ram[this.#word(hi, lo)] = this.#regops.${parts[1]}()\n` +
+          `}\n`
         break
       }
 
       if (parts[0] == '(nnnn)' && wordRegMatch(parts[1])) {
         // write word register to memory
         const [msb, lsb] = parts[1].split('')
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#ram[this.#word(hi, lo)] = this.#regops.${lsb}()\n  this.#ram[this.#addWord(this.#word(hi, lo), 1)] = this.#regops.${msb}()\n}\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  this.#ram[this.#word(hi, lo)] = this.#regops.${lsb}()\n` +
+          `  this.#ram[this.#addWord(this.#word(hi, lo), 1)] = this.#regops.${msb}()\n` +
+          `}\n`
         break
       }
 
       if (byteRegMatch(parts[0]) && parts[1] == '(nnnn)') {
         // load memory to byte register
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${parts[0]}(this.#ram[this.#word(hi, lo)])\n}\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  this.#regops.${parts[0]}(this.#ram[this.#word(hi, lo)])\n` +
+          `}\n`
         break
       }
 
       if (wordRegMatch(parts[0]) && parts[1] == '(nnnn)') {
         // load memory to word register
         const [msb, lsb] = parts[1].split('')
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#regops.${lsb}(this.#ram[this.#word(hi, lo)])\n  this.#regops.${msb}(this.#ram[this.#addWord(this.#word(hi, lo), 1)])\n}\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` +
+          `  this.#regops.${lsb}(this.#ram[this.#word(hi, lo)])\n` +
+          `  this.#regops.${msb}(this.#ram[this.#addWord(this.#word(hi, lo), 1)])\n` +
+          `}\n`
         break
       }
 
       if (parts[0].match(/\(..\)/) && parts[1] == 'nn') {
         const register = parts[0].replace(/[()]/g, '')
         // write byte to memory by register
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#ram[this.#regops.${register}()] = this.#getPC() }\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => { this.#ram[this.#regops.${register}()] = this.#getPC() }\n`
         break
       }
 
       if (parts[0].match(/\(..\)/) && byteRegMatch(parts[1])) {
         const register = parts[0].replace(/[()]/g, '')
         // write 8-bit register to memory by register
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#ram[this.#regops.${register}()] = this.#regops.${parts[1]}() }\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => { this.#ram[this.#regops.${register}()] = this.#regops.${parts[1]}() }\n`
         break
       }
 
       if (byteRegMatch(parts[0]) && parts[1].match(/\(..\)/)) {
         const register = parts[1].replace(/[()]/g, '')
         // load 8-bit register from memory by register
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#ram[this.#regops.${register}()]) }\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${parts[0]}(this.#ram[this.#regops.${register}()]) }\n`
         break
       }
 
