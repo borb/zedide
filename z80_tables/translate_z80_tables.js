@@ -323,7 +323,7 @@ splitInput.forEach((line) => {
       outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.${param}(this.#popWord()) }\n`
       break
 
-    case 'inc':
+    case 'inc': {
       // increment by one
       switch (param) {
         // there is no af, because incrementing the flag register makes no sense
@@ -381,13 +381,34 @@ splitInput.forEach((line) => {
             `}\n`
           break
 
+        case '(ix+dd)':
+        case '(iy+dd)':
+          // register indirect mode
+          const register = param.substring(1, 3)
+          outputBuffer += `// ${verbatimOp}\n` +
+            `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+            `  const offset = this.#uint8ToInt8(this.#getPC())\n` +
+            `  const old = this.#ram[this.#registers.${register} + offset]\n` +
+            `  const new = this.#addByte(old, 1)\n` +
+            `  this.#ram[this.#registers.${register} + offset] = new\n` +
+            `  this.#regops.f(\n` +
+            `      this.#regops.f()\n` +
+            `    | this.#FREG_C\n` +
+            `    | ((old & 0x0f) ? 0 : this.#FREG_H)\n` +
+            `    | ((new == 0x80) ? this.#FREG_V : 0)\n` +
+            `    | this.#flagTable.sz53[new]\n` +
+            `  )\n` +
+            `}\n`
+          break
+
         default:
           console.warn(`unhandled inc param: ${mnemonic} ${param}`)
           break
       }
       break
+    }
 
-    case 'dec':
+    case 'dec': {
       // decrement by one
       switch (param) {
         // there is no af, because decrementing the flag register makes no sense
@@ -448,11 +469,33 @@ splitInput.forEach((line) => {
             `}\n`
           break
 
+        case '(ix+dd)':
+        case '(iy+dd)':
+          // register indirect mode
+          const register = param.substring(1, 3)
+          outputBuffer += `// ${verbatimOp}\n` +
+            `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+            `  const offset = this.#uint8ToInt8(this.#getPC())\n` +
+            `  const old = this.#ram[this.#registers.${register} + offset]\n` +
+            `  const new = this.#subByte(old, 1)\n` +
+            `  this.#ram[this.#registers.${register} + offset] = new\n` +
+            `  this.#regops.f(\n` +
+            `      this.#regops.f()\n` +
+            `    | this.#FREG_C\n` +
+            `    | ((old & 0x0f) ? 0 : this.#FREG_H)\n` +
+            `    | this.#FREG_N\n` +
+            `    | ((new == 0x7f) ? this.#FREG_V : 0)\n` +
+            `    | this.#flagTable.sz53[new]\n` +
+            `  )\n` +
+            `}\n`
+          break
+
         default:
           console.warn(`unhandled dec param: ${mnemonic} ${param}`)
           break
       }
       break
+    }
 
     case 'call':
     case 'jp':
