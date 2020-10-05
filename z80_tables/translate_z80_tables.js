@@ -895,12 +895,12 @@ splitInput.forEach((line) => {
 
     case 'in':
     case 'out':
-      // @todo need to set sz53p flags & retain carry
       // input/output
       const [arg1, arg2] = param.split(/,/)
 
       if ((byteRegMatch(arg1) && (arg2 == '(nn)')) || ((arg1 == '(nn)') && byteRegMatch(arg2))) {
         // read or write by port number in next byte (register is always a)
+        // flags are NOT affected by this read
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n`
 
@@ -922,6 +922,11 @@ splitInput.forEach((line) => {
           ? `  this.#regops.${arg1}(this.#callIoHandler(this.#regops.${portRegister}(), 'r'))`
           : `  this.#callIoHandler(this.#regops.${portRegister}(), 'w', this.#regops.${arg2}())`
 
+        if (mnemonic === 'in') {
+          // affect flags, but only for input mode
+          outputBuffer += `\n  this.#regops.f((this.#regops.f() & this.#FREG_C) | this.#flagTables.sz53p[this.#regops.${arg1}()])`
+        }
+
         outputBuffer += `\n}\n`
         break
       }
@@ -935,6 +940,16 @@ splitInput.forEach((line) => {
           `  this.#regops.f((this.#regops.f() & this.#FREG_C) | this.#flagTables.sz53p[this.#regops.${portRegister}()])` +
           `}\n`
 
+        break
+      }
+
+      if (mnemonic === 'out' && byteRegMatch(arg1.replace(/[()]/g, '')) && arg2 === '0') {
+        // weird one: write zero to port in arg1 (guess it's got lower t-state count than reading register)
+        const portRegister = arg1.substring(1, 2)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#callIoHandler(this.#regops.${portRegister}(), 'w', 0)\n` +
+          `}\n`
         break
       }
 
