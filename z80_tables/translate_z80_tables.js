@@ -971,6 +971,17 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (src.match(/\(..\+dd\)/)) {
+        // src is read from an indirect location by register
+        src = src.substring(1, 3)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  this.#regops.${dst}(this.#regops.${dst}() & this.#ram[this.#regops.${src}() + this.#uint8ToInt8(this.#getPC())])\n` +
+          `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()] | this.#FREG_H)\n` +
+          `}\n`
+        break
+      }
+
       console.warn(`unhandled and param: ${mnemonic} ${param}`)
       break
     }
@@ -1020,6 +1031,17 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (src.match(/\(..\+dd\)/)) {
+        // src is read from an indirect location by register
+        src = src.substring(1, 3)
+        outputBuffer += `// ${verbatimOp}\n` +
+        `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+        `  this.#regops.${dst}(this.#regops.${dst}() ${bitwiseOp} this.#ram[this.#regops.${src}() + this.#uint8ToInt8(this.#getPC())])\n` +
+        `  this.#regops.f(this.#flagTable.sz53p[this.#regops.a()])\n` +
+        `}\n`
+        break
+      }
+
       console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
       break
     }
@@ -1064,6 +1086,14 @@ splitInput.forEach((line) => {
         // against value in (reg)
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => this.#cp8(this.#regops.${dst}(), this.#ram[this.#regops.${src}()])\n`
+        break
+      }
+
+      if (src.match(/\(..\+dd\)/)) {
+        src = src.substring(1, 3)
+        // against value in (reg) + indirect
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => this.#cp8(this.#regops.${dst}(), this.#ram[this.#regops.${src}() + this.#uint8ToInt8(this.#getPC())])\n`
         break
       }
 
