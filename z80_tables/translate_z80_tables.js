@@ -896,19 +896,16 @@ splitInput.forEach((line) => {
     case 'in':
     case 'out':
       // input/output
-      let [arg1, arg2] = param.split(/,/)
+      const [arg1, arg2] = param.split(/,/)
 
-      arg1 = arg1.replace(/[()]/g, '')
-      arg2 = arg2.replace(/[()]/g, '')
-
-      if (arg1 == 'nn' || arg2 == 'nn') {
+      if ((byteRegMatch(arg1) && (arg2 == '(nn)')) || ((arg1 == '(nn)') && byteRegMatch(arg2))) {
         // read or write by port number in next byte (register is always a)
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n`
 
         outputBuffer += mnemonic == 'in'
-          ? `  this.#regops.a(this.#callIoHandler(this.#getPC(), 'r'))`
-          : `  this.#callIoHandler(this.#getPC(), 'w', this.#regops.a())`
+          ? `  this.#regops.${arg1}(this.#callIoHandler(this.#getPC(), 'r'))`
+          : `  this.#callIoHandler(this.#getPC(), 'w', this.#regops.${arg2}())`
 
         outputBuffer += `\n}\n`
         break
