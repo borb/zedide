@@ -660,6 +660,16 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (byteRegMatch(dst) && src.match(/\(..\+dd\)/)) {
+        // byte add to a from indirect memory location
+        src = src.substring(1, 3)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#add8(this.#regops.${dst}(), this.#ram[this.#regops.${src}() + this.#uint8ToInt8(this.#getPC())])\n` +
+          `}\n`
+        break
+      }
+
       console.warn(`unhandled add param: ${mnemonic} ${param}`)
       break
     }
@@ -704,6 +714,16 @@ splitInput.forEach((line) => {
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` + carryPart +
           `  this.#regops.${dst}(this.#sub8(this.#regops.${dst}(), this.#ram[this.#regops.${src}()])\n` +
+          `}\n`
+        break
+      }
+
+      if (byteRegMatch(dst) && src.match(/\(..\+dd\)/)) {
+        // byte sub from a from indirect memory location
+        src = src.substring(1, 3)
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#sub8(this.#regops.${dst}(), this.#ram[this.#regops.${src}() + this.#uint8ToInt8(this.#getPC())])\n` +
           `}\n`
         break
       }
