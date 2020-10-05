@@ -1176,6 +1176,23 @@ splitInput.forEach((line) => {
         break
       }
 
+      if (testSubject.match(/\(..\+dd\)/)) {
+        // test subject is a memory location by register+offset
+        const indirParam = testSubject.match(/\((..)\+dd\)/)
+
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  this.#regops.f(\n` +
+          `      (this.#regops.f() & this.#FREG_C)\n` +
+          `    | this.#FREG_H\n` +
+          `    | (this.#ram[location] & (this.#FREG_F3 | this.#FREG_F5))\n` +
+          `    | (((this.#ram[location] & (1 << ${bit})) === 0) ? (this.#FREG_P | this.#FREG_Z) : 0)\n` +
+          `  )\n` +
+          `}\n`
+        break
+      }
+
       console.warn(`unhandled bit param: ${mnemonic} ${param}`)
       break
     }
@@ -1183,7 +1200,7 @@ splitInput.forEach((line) => {
     case 'set':
     case 'res': {
       // set/reset (clear) bit N of register/memory. flags unaffected. & with inverted bitmap should suffice for reset.
-      const [bit, testSubject] = param.split(/,/)
+      const [bit, testSubject, dst] = param.split(/,/)
 
       if (byteRegMatch(testSubject)) {
         // register mode
@@ -1198,6 +1215,24 @@ splitInput.forEach((line) => {
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  this.#ram[this.#regops.${register}()] = this.#ram[this.#regops.${register}()] & ${(mnemonic === 'res') ? '~' : ''}(1 << ${bit})\n` +
+          `}\n`
+        break
+      }
+
+      if (testSubject.match(/\(..\+dd\)/)) {
+        // address+offset mode (dd should be signed so can read backwards)
+        const indirParam = testSubject.match(/\((..)\+dd\)/)
+
+        let secondAssignment = ''
+        if (typeof dst !== 'undefined') {
+          // assign the result to another register
+          secondAssignment = `this.#regops.${dst}(`
+        }
+
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = (dd) => {\n` +
+          `  const location = this.#regops.${indirParam[1]}() + this.#uint8ToInt8(dd)\n` +
+          `  ${secondAssignment}this.#ram[location] = this.#ram[location] & ${(mnemonic === 'res') ? '~' : ''}(1 << ${bit})${secondAssignment ? ')' : ''}\n` +
           `}\n`
         break
       }
