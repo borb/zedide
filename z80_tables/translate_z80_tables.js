@@ -287,7 +287,10 @@ splitInput.forEach((line) => {
       break
 
     case 'ret':
+    case 'retn':
+    case 'reti':
       // return from a subroutine call (pop word from sp and load into pc)
+      // retn is return from an nmi; reti is return from a maskable interrupt (i/o)
       if (typeof param === 'undefined') {
         outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#regops.pc(this.#popWord()) }\n`
         break
