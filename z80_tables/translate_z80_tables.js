@@ -1576,6 +1576,11 @@ splitInput.forEach((line) => {
       break
     }
 
+    case 'im':
+      // set interrupt mode
+      outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#registers.im = ${param} }\n`
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)

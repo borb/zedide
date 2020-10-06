@@ -31,7 +31,9 @@ class ProcessorZ80
     ix: 0x0000,
     iy: 0x0000,
     i: 0x00,
-    r: 0x00
+    r: 0x00,
+    // interrupt mode
+    im: 0
   }
 
   // shorthand getter/setter access for registers, prevents having to recombine hi/lo bytes
