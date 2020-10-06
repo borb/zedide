@@ -1587,6 +1587,28 @@ splitInput.forEach((line) => {
       outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => this.#regops.a(this.#sub8(0, this.#regops.a()))\n`
       break
 
+    case 'rrd':
+      // shuffle about nibbles between a and (hl)
+      outputBuffer += `// ${verbatimOp}\n` +
+        `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+        `  const hlData = this.#ram[this.#registers.hl]\n` +
+        `  this.#ram[this.#registers.hl] = ((this.#regops.a() << 4) | (hlData >> 4)) & 0xff;\n` +
+        `  this.#regops.a((this.#regops.a() & 0xf0) | (hlData & 0x0f))\n` +
+        `  this.#regops.f((this.#regops.f() & this.#FREG_C) | this.#flagTables.sz53p[this.#regops.a()])\n` +
+        `}\n`
+      break
+
+    case 'rld':
+      // like rrd but moving to different nibble positions
+      outputBuffer += `// ${verbatimOp}\n` +
+        `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+        `  const hlData = this.#ram[this.#registers.hl]\n` +
+        `  this.#ram[this.#registers.hl] = ((hlData << 4) | (this.#regops.a() & 0x0f)) & 0xff;\n` +
+        `  this.#regops.a((this.#regops.a() & 0xf0) | (hlData >> 0x0f))\n` +
+        `  this.#regops.f((this.#regops.f() & this.#FREG_C) | this.#flagTables.sz53p[this.#regops.a()])\n` +
+        `}\n`
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
