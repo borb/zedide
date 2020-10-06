@@ -1581,6 +1581,12 @@ splitInput.forEach((line) => {
       outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => { this.#registers.im = ${param} }\n`
       break
 
+    case 'neg':
+      // subtract a from 0 in a signed manner (twos compliment)
+      // fuse handles this no different from a normal byte sub, so let's do the same
+      outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => this.#regops.a(this.#sub8(0, this.#regops.a()))\n`
+      break
+
     default:
       if (typeof unhandled[mnemonic] === 'undefined') {
         console.warn(`unhandled mnemonic: ${mnemonic}`)
