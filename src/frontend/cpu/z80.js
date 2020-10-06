@@ -168,6 +168,26 @@ class ProcessorZ80
     return finalResult
   }
 
+  // ...PK's SUB for 16-bit ops
+  #sub16 = (value1, value2) => {
+    let [underflowedResult, finalResult] = [value1 - value2, this.#subWord(value1, value2)]
+    let hcsLookup = (((value1 & 0x8800) >> 11) |
+                     ((value2 & 0x8800) >> 10) |
+                     ((underflowedResult & 0x8800) >> 9)) & 0xff
+
+    // affect the flags for half carry sub, return product
+    this.#regops.f(
+      (underflowedResult & 0x10000 ? this.#FREG_C : 0) |
+      this.#FREG_N |
+      this.#overflowSub[hcsLookup >> 4] |
+      this.#halfCarrySub[hcsLookup & 0x07] |
+      (finalResult === 0 ? this.#FREG_Z : 0) |
+      ((finalResult >> 8) & (this.#FREG_F3 | this.#FREG_F5 | this.#FREG_S))
+    )
+
+    return finalResult
+  }
+
   // ...and ported from Philip Kendall's ADD with changes by myself
   #add8 = (value1, value2) => {
     // in reality, all adds stack onto the accumulator, but let's retain convention with add16

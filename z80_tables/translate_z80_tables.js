@@ -675,8 +675,7 @@ splitInput.forEach((line) => {
     }
 
     case 'sub':
-    case 'sbc':
-    {
+    case 'sbc': {
       let [dst, src] = param.split(/,/)
       let carryPart = ''
 
@@ -728,7 +727,16 @@ splitInput.forEach((line) => {
         break
       }
 
-      console.warn(`unhandled sub param: ${mnemonic} ${param}`)
+      if ((mnemonic === 'sbc') && wordRegMatch(dst) && wordRegMatch(src)) {
+        // word sub between registers - this is ALWAYS sbc, never sub
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` + carryPart +
+          `  this.#regops.${dst}(this.#subWord(this.#sub16(this.#regops.${dst}(), this.#regops.${src}())), (this.#regops.f() & this.#FREG_C ? 1 : 0))\n` +
+          `}\n`
+        break
+      }
+
+      console.warn(`unhandled ${mnemonic} param: ${mnemonic} ${param}`)
       break
     }
 
