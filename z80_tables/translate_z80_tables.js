@@ -84,7 +84,7 @@ let unhandled = {}
 
 // regexp helpers for simplify matching
 const anyRegMatch = (reg) => reg.match(/^(a|b|c|d|e|h|l|ixh|ixl|iyh|iyl|bc|de|hl|ix|iy|sp|pc|af|af')$/)
-const byteRegMatch = (reg) => reg.match(/^(a|b|c|d|e|h|l|ixh|ixl|iyh|iyl)$/)
+const byteRegMatch = (reg) => reg.match(/^(a|b|c|d|e|h|l|ixh|ixl|iyh|iyl|i|r)$/)
 const wordRegMatch = (reg) => reg.match(/^(bc|de|hl|ix|iy|sp|pc|af|af')$/)
 
 splitInput.forEach((line) => {
