@@ -6085,6 +6085,9 @@ class ProcessorZ80
     // END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*
   }
 
+  // our prepared instruction
+  #preparedInstruction = {}
+
   /**
    * Constructor
    *
@@ -6120,12 +6123,78 @@ class ProcessorZ80
   }
 
   /**
-   * Fetch and execute an instruction
+   * Convert an opcode instruction table chain to a hex string
+   *
+   * @param array   callchain   The callchain to convert into a hex string
+   * @return string
+   */
+  callChainToHex(callchain = [])
+  {
+    let callchainString = '0x'
+    callchain.forEach((op) => {
+      callchainString += op.toString(16).toUpperCase()
+    })
+    return this.callchainString
+  }
+
+  /**
+   * Fetch an instruction
    *
    * @return void
    */
-  fetchExecute()
+  fetch()
   {
+    let inFetch = true
+    this.#preparedInstruction = {
+      instruction: [],
+      dd: null,
+      opcodeScope: this.#opcodes
+    }
+
+    while (inFetch) {
+      // ddcb/fdcb subtable workaround - z80 ddcb/fdcb instructions follow the format 0x[dd/fd] 0xcb <parameter> <opcode>.
+      // so if we're at this level, pull the parameter and put into this.#pI.dd and fetch the next value for instruction.
+      // ALL OTHER +dd instructions (in IX/IY indirect levels 0xdd/fd) are handled by the simulated opcode and don't need this!
+      if ((this.#preparedInstruction.instruction === [0xdd, 0xcb]) || (this.#preparedInstruction.instruction === [0xfd, 0xcb]))
+        this.#preparedInstruction.dd = this.#getPC()
+
+      const opcode = this.#getPC()
+      this.#preparedInstruction.instruction.push(opcode)
+
+      // check for invalid instruction
+      if (typeof this.#preparedInstruction.opcodeScope[opcode] === 'undefined') {
+        throw `CPU FAULT: invalid instruction opcode ${this.callChainToHex(this.#preparedInstruction.instruction)}`
+      }
+
+      if (typeof this.#preparedInstruction.opcodeScope[opcode] === 'object') {
+        // switch to a subtable
+        this.#preparedInstruction.opcodeScope = this.#preparedInstruction.opcodeScope[opcode]
+        continue
+      }
+
+      if (typeof this.#preparedInstruction.opcodeScope[opcode] === 'function') {
+        this.#preparedInstruction.opcodeScope = this.#preparedInstruction.opcodeScope[opcode]
+        inFetch = false
+        continue // this will break out of the fetch loop
+      }
+
+      throw `vCPU FAULT: error in opcode table, examine callchain ${this.callChainToHex(this.#preparedInstruction.instruction)}`
+    }
+  }
+
+  /**
+   * Execute an instruction which has been fetched with this.fetch()
+   *
+   * @return void
+   */
+  execute()
+  {
+    if ((this.#preparedInstruction === {})
+        || (this.#preparedInstruction.instruction === [])
+        || (typeof this.#preparedInstruction.opcodeScope !== 'function'))
+      throw `vCPU FAULT: execute() called without fetch() or major fault`
+
+    this.#preparedInstruction.opcodeScope(this.#preparedInstruction.dd)
   }
 
   /**
