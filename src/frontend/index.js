@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // setup the cpu with the built program
         $scope.cpu = new ProcessorZ80(binary)
         $scope.updateRegisters($scope.cpu.getRegisters())
-        $scope.addIoHandler(10, $scope.cpuPreArea)
+        $scope.cpu.addIoHandler(10, $scope.cpuPreArea)
 
         $scope.outputMessages = 'Build succeeded\n'
         $scope.cpuOutput = ''
