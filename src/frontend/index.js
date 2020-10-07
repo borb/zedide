@@ -132,22 +132,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     $scope.step = () => {
-      if ($scope.regs.pc === 'na') {
-        $scope.outputMessages += 'Cannot step through program until it has been built: Please click "Assemble"\n'
-        return
+      const update = () => {
+        if ($scope.regs.pc === 'na') {
+          $scope.outputMessages += 'Cannot step through program until it has been built: Please click "Assemble"\n'
+          return
+        }
+
+        try {
+          $scope.cpu.fetch()
+          $scope.cpu.execute()
+        } catch (e) {
+          $scope.outputMessages += e
+          $scope.running = false
+        }
+        $scope.updateRegisters($scope.cpu.getRegisters())
+
+        if ($scope.running)
+          $scope.timer = setTimeout($scope.step, 400)
       }
 
-      try {
-        $scope.cpu.fetch()
-        $scope.cpu.execute()
-      } catch (e) {
-        $scope.outputMessages += e
-        $scope.running = false
-      }
-      $scope.updateRegisters($scope.cpu.getRegisters())
-
-      if ($scope.running)
-        $scope.timer = setTimeout($scope.step, 400)
+      // handle ui-interactive updates
+      if (!$scope.$$phase)
+        return $scope.$apply(update)
+      update()
     }
   }])
 })
