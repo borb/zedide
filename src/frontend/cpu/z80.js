@@ -6096,7 +6096,7 @@ class ProcessorZ80
   constructor(ram = null)
   {
     // initialise memory to zero
-    for (i = 0; i < Math.pow(2, 16); i++) {
+    for (let i = 0; i < Math.pow(2, 16); i++) {
       this.#ram[i] = 0
     }
 
