@@ -36,9 +36,18 @@
 				font-family: 'Roboto Mono', 'Cascadia Code', monospace;
 				font-size: 18px;
 			}
+			table {
+				border: 1px solid black;
+				width: 100%;
+			}
+
+			table tr th {
+				text-align: left;
+				border: 1px solid grey;
+			}
 		</style>
 	</head>
-	<body>
+	<body ng-controller="ideController">
 		<div class="editor">
 			<textarea id="code-editor">
 	.org $0000
@@ -50,13 +59,74 @@ loop:
 </textarea>
 		</div>
 		<div class="toolkit">
-			<p>tools here</p>
+			<h2>Control panel</h2>
 			<p>
-				<button id="assemble" onclick="document.assemble()">Assemble</button>
-				<button id="save" onclick="document.save()">Save</button>
+				<button id="assemble" ng-click="assemble()">Assemble</button>
+				<button id="save" ng-click="save()">Save</button>
 			</p>
+			<h2>Program control</h2>
+			<p>
+				<button id="step" ng-click="step()">Step</button>
+			</p>
+			<table>
+				<tr>
+					<th>pc</th>
+					<th>sp</th>
+					<th>im</th>
+					<th>interrupts</th>
+				</tr>
+				<tr>
+					<td>{{ regs.pc }}</td>
+					<td>{{ regs.sp }}</td>
+					<td>{{ regs.im }}</td>
+					<td>{{ regs.interrupts }}</td>
+				</tr>
+				<tr>
+					<th>a</th>
+					<th>bc</th>
+					<th>de</th>
+					<th>hl</th>
+				</tr>
+				<tr>
+					<td>{{ regs.a }}</td>
+					<td>{{ regs.bc }}</td>
+					<td>{{ regs.de }}</td>
+					<td>{{ regs.hl }}</td>
+				</tr>
+				<tr>
+					<th>a'</th>
+					<th>bc'</th>
+					<th>de'</th>
+					<th>hl'</th>
+				</tr>
+				<tr>
+					<td>{{ regs.a2 }}</td>
+					<td>{{ regs.bc2 }}</td>
+					<td>{{ regs.de2 }}</td>
+					<td>{{ regs.hl2 }}</td>
+				</tr>
+				<tr>
+					<th>ix</th>
+					<th>iy</th>
+					<th>i</th>
+					<th>r</th>
+				</tr>
+				<tr>
+					<td>{{ regs.ix }}</td>
+					<td>{{ regs.iy }}</td>
+					<td>{{ regs.i }}</td>
+					<td>{{ regs.r }}</td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<td>cpu flags</td>
+				</tr>
+				<tr><td><pre>sz5h3pnc</pre></td></tr>
+				<tr><td><pre>{{ regs.flags }}</pre></td></tr>
+			</table>
 		</div>
-		<div id="output-messages" class="output-messages"></div>
+		<div class="output-messages" ng-bind-html="outputMessages | nl2br"></div>
 		<script src="/js/frontend.bundle.js"></script>
 	</body>
 </html>
