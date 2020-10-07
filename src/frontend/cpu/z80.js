@@ -753,8 +753,8 @@ class ProcessorZ80
     // scf
     this.#opcodes[0x37] = () => {
       this.#regops.f(
-        this.#regops.f() & ~(this.#FREG_N | this.#FREG_H)
-        & ~(this.#FREG_F3 | this.#FREG_F5)
+        this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S)
+        | this.#FREG_C
         | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))
       )
     }

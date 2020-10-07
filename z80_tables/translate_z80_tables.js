@@ -588,12 +588,11 @@ splitInput.forEach((line) => {
 
     case 'scf':
       // set carry flag: c is set; p/v, z & s are unaffected; n & h are unset; f3 & f5 are set they leak out of the accumulator
-      // explanation of below: take f, mask out n and h, mask out f3 and f5 then bring them back in if they leak from a.
       outputBuffer += `// ${verbatimOp}\n` +
         `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
         `  this.#regops.f(\n` +
-        `    this.#regops.f() & ~(this.#FREG_N | this.#FREG_H)\n` +
-        `    & ~(this.#FREG_F3 | this.#FREG_F5)\n` +
+        `    this.#regops.f() & (this.#FREG_P | this.#FREG_Z | this.#FREG_S)\n` +
+        `    | this.#FREG_C\n` +
         `    | (this.#regops.a() & (this.#FREG_F3 | this.#FREG_F5))\n` +
         `  )\n` +
         `}\n`
