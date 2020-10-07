@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
   application.controller('ideController', ['$scope', '$http', ($scope, $http) => {
     $scope.outputMessages = 'Welcome!\n'
     $scope.cpuOutput = ''
+    $scope.running = false
+    $scope.timer = false
 
     $scope.cpu = undefined
 
@@ -98,6 +100,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return false
     }
 
+    $scope.run = () => {
+      $scope.running = true
+      $scope.step()
+    }
+
+    $scope.stop = () => {
+      $scope.running = false
+      clearTimeout($scope.timer)
+      $scope.timer = false
+    }
+
     $scope.cpuPreArea = (mode, data) => {
       if (mode === 'r')
         return 0x00
@@ -129,8 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
         $scope.cpu.execute()
       } catch (e) {
         $scope.outputMessages += e
+        $scope.running = false
       }
       $scope.updateRegisters($scope.cpu.getRegisters())
+
+      if ($scope.running)
+        $scope.timer = setTimeout($scope.step, 400)
     }
   }])
 })
