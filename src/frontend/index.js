@@ -76,12 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     $scope.updateRegisters = (regs) => {
+      // pull the left 8 bits of af into a
+      regs.a = (regs.af >> 8) & 0xff
+      regs.a2 = (regs.af2 >> 8) & 0xff
+
+      // format everything as hex
       Object.keys(regs).forEach((key) => {
         $scope.regs[key] = regs[key].toString(16)
       })
-      // pull the left 8 bits of af into a and format
-      $scope.regs.a = ($scope.regs.af >> 8) & 0xff
-      $scope.regs.a2 = ($scope.regs.af2 >> 8) & 0xff
+
       // format the flags as bits
       let flags = ($scope.regs.f & 0x00ff).toString(2)
       flags = ('0'.repeat(8 - flags.length)) + flags
