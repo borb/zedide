@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
       })
 
       // format the flags as bits
-      let flags = ($scope.regs.f & 0x00ff).toString(2)
+      let flags = (regs.af & 0x00ff).toString(2)
       flags = ('0'.repeat(8 - flags.length)) + flags
       $scope.regs.flags = flags
     }
