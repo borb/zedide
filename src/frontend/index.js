@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   application.controller('ideController', ['$scope', '$http', ($scope, $http) => {
     $scope.outputMessages = 'Welcome!\n'
+    $scope.cpuOutput = ''
 
     $scope.cpu = undefined
 
@@ -97,14 +98,23 @@ document.addEventListener('DOMContentLoaded', () => {
       return false
     }
 
+    $scope.cpuPreArea = (mode, data) => {
+      if (mode === 'r')
+        return 0x00
+
+      $scope.cpuOutput += String.fromCharCode(data)
+    }
+
     $scope.assemble = () => {
       let binary = $scope.doCompile($scope.codeMirror.getValue())
       if (binary !== false) {
         // setup the cpu with the built program
         $scope.cpu = new ProcessorZ80(binary)
         $scope.updateRegisters($scope.cpu.getRegisters())
+        $scope.addIoHandler(10, $scope.cpuPreArea)
 
         $scope.outputMessages = 'Build succeeded\n'
+        $scope.cpuOutput = ''
       }
     }
 

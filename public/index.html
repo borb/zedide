@@ -25,6 +25,13 @@
 				float: right;
 				border: 1px solid blue;
 			}
+			pre.cpu-output {
+				margin: 0;
+				padding: 5px 5px 5px 5px;
+				width: 100%;
+				border: 1px solid magenta;
+				clear: both;
+			}
 			div.output-messages {
 				margin: 0;
 				padding: 5px 5px 5px 5px;
@@ -126,6 +133,7 @@ loop:
 				<tr><td><pre>{{ regs.flags }}</pre></td></tr>
 			</table>
 		</div>
+		<pre class="cpu-output" ng-bind="cpuOutput"></pre>
 		<div class="output-messages" ng-bind-html="outputMessages | nl2br"></div>
 		<script src="/js/frontend.bundle.js"></script>
 	</body>
