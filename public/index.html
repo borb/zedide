@@ -61,6 +61,12 @@
 	ld a, $00
 loop:
 	ld ($ffff), a
+	ld bc, $aabb
+	ld de, $ccdd
+	ld hl, $eeff
+	exx
+	ex af, af'
+	scf
 	inc a
 	jp loop
 </textarea>
