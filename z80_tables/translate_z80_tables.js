@@ -179,7 +179,12 @@ splitInput.forEach((line) => {
 
       if (wordRegMatch(parts[0]) && parts[1] == '(nnnn)') {
         // load memory to word register
-        const [msb, lsb] = parts[0].split('')
+        let [msb, lsb] = parts[0].split('')
+        // handle when word is ix/iy because cpus aren't text processors
+        if (parts[0] === 'ix' || parts[0] === 'iy') {
+          msb = `i${parts[0][1]}h`
+          lsb = `i${parts[0][1]}l`
+        }
         outputBuffer += `// ${verbatimOp}\n` +
           `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
           `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` +

@@ -2847,8 +2847,8 @@ class ProcessorZ80
     // ld ix,(nnnn)
     this.#opcodes[0xdd][0x2a] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      this.#regops.x(this.#ram[this.#word(hi, lo)])
-      this.#regops.i(this.#ram[this.#addWord(this.#word(hi, lo), 1)])
+      this.#regops.ixl(this.#ram[this.#word(hi, lo)])
+      this.#regops.ixh(this.#ram[this.#addWord(this.#word(hi, lo), 1)])
     }
     // dec ix
     this.#opcodes[0xdd][0x2b] = () => { this.#registers.ix = this.#subWord(this.#registers.ix, 1) }
@@ -3387,8 +3387,8 @@ class ProcessorZ80
     // ld iy,(nnnn)
     this.#opcodes[0xfd][0x2a] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      this.#regops.y(this.#ram[this.#word(hi, lo)])
-      this.#regops.i(this.#ram[this.#addWord(this.#word(hi, lo), 1)])
+      this.#regops.iyl(this.#ram[this.#word(hi, lo)])
+      this.#regops.iyh(this.#ram[this.#addWord(this.#word(hi, lo), 1)])
     }
     // dec iy
     this.#opcodes[0xfd][0x2b] = () => { this.#registers.iy = this.#subWord(this.#registers.iy, 1) }
