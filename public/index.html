@@ -64,11 +64,19 @@ loop:
 	ld bc, $aabb
 	ld de, $ccdd
 	ld hl, $eeff
-	exx
-	ex af, af'
+	;exx
+	;ex af, af'
 	scf
 	inc a
-	jp loop
+	; cheat at resetting cpu flags
+	ld hl, $00
+	push hl
+	pop af
+	; trigger zero flag to be set by loading ixh with 1 and deccing it
+	ld ixh, $01
+	dec ixh
+	; this will only run if dec a results in z being set
+	jp z, loop
 </textarea>
 		</div>
 		<div class="toolkit">
