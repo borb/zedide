@@ -55,7 +55,7 @@ class ProcessorZ80
     _genLo: (register, newVal) => {
       if (typeof newVal === 'undefined')
         return this.#lo(this.#registers[register])
-      this.#registers[register] = this.#word(this.#hi(this.#registers[register], newVal))
+      this.#registers[register] = this.#word(this.#hi(this.#registers[register]), newVal)
     },
 
     // map the above three methods to shorthand register operations
