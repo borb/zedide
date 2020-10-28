@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $scope.run = () => {
       if ($scope.dirty)
-        $scope.outputMessages += `WARNING: Buffer has changed since last assembly - consider stopping and reassembling`
+        $scope.outputMessages += `WARNING: Buffer has changed since last assembly - consider stopping and reassembling\n`
       $scope.running = true
       $scope.step()
     }
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
           $scope.cpu.fetch()
           $scope.cpu.execute()
         } catch (e) {
-          $scope.outputMessages += e
+          $scope.outputMessages += `${e}\n`
           $scope.running = false
         }
         $scope.updateRegisters($scope.cpu.getRegisters())
