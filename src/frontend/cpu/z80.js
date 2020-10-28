@@ -1,3 +1,5 @@
+'use strict'
+
 /**
  * Z80 CPU simulator for javascript
  *

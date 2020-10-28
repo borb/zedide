@@ -1,3 +1,5 @@
+'use strict'
+
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/z80/z80'
