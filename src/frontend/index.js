@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $scope.cpuOutput = ''
     $scope.running = false
     $scope.timer = false
+    $scope.dirty = true
 
     $scope.cpu = undefined
 
@@ -53,6 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mode: 'z80'
       }
     )
+    $scope.codeMirror.on('change', () => {
+      $scope.dirty = true
+    })
 
     $scope.regs = {
       pc: 'na',
@@ -98,12 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return hextools.hex2bin(hex, 0, Math.pow(2, 16) - 1)
       }
       // an error during compilation
-      $scope.outputMessages += `Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')`
+      $scope.outputMessages += `Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')\n`
       console.log(error)
       return false
     }
 
     $scope.run = () => {
+      if ($scope.dirty)
+        $scope.outputMessages += `WARNING: Buffer has changed since last assembly - consider stopping and reassembling`
       $scope.running = true
       $scope.step()
     }
@@ -131,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         $scope.outputMessages = 'Build succeeded\n'
         $scope.cpuOutput = ''
+        $scope.dirty = false
       }
     }
 
