@@ -6132,11 +6132,7 @@ class ProcessorZ80
    */
   callChainToHex(callchain = [])
   {
-    let callchainString = '0x'
-    callchain.forEach((op) => {
-      callchainString += op.toString(16).toUpperCase()
-    })
-    return this.callchainString
+    return callchain.reduce((p, c, i) => p = p + c.toString(16).toUpperCase(), '0x')
   }
 
   /**
@@ -6157,7 +6153,9 @@ class ProcessorZ80
       // ddcb/fdcb subtable workaround - z80 ddcb/fdcb instructions follow the format 0x[dd/fd] 0xcb <parameter> <opcode>.
       // so if we're at this level, pull the parameter and put into this.#pI.dd and fetch the next value for instruction.
       // ALL OTHER +dd instructions (in IX/IY indirect levels 0xdd/fd) are handled by the simulated opcode and don't need this!
-      if ((this.#preparedInstruction.instruction === [0xdd, 0xcb]) || (this.#preparedInstruction.instruction === [0xfd, 0xcb]))
+      if ((this.#preparedInstruction.instruction.length === 2) &&
+          [0xdd, 0xfd].includes(this.#preparedInstruction.instruction[0]) &&
+          (this.#preparedInstruction.instruction[1] === 0xcb))
         this.#preparedInstruction.dd = this.#getPC()
 
       const opcode = this.#getPC()
