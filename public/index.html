@@ -67,7 +67,7 @@ loop:
 	ld de, $ccdd
 	ld hl, $eeff
 
-		; play around with swapping between register banks
+	; play around with swapping between register banks
 	;exx
 	;ex af, af'
 
@@ -96,6 +96,12 @@ loop:
 	; trigger zero flag to be set by loading ixh with 1 and deccing it
 	ld ixh, $01
 	dec ixh
+
+	; ix/iy load bit ops test
+	; no official syntax! erk!
+	ld iy, $0000
+	.db $fd, $cb, $00, $10 ; rl (iy+00) store in b
+	halt
 
 	; this will only run if dec a results in z being set
 	jp z, loop
