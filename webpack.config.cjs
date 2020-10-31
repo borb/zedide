@@ -35,6 +35,7 @@ module.exports = {
     contentBase: path.resolve(__dirname, 'public/'),
     publicPath: '/js/',
     compress: true,
+    host: '0.0.0.0',
     port: 3000
   }
 }
