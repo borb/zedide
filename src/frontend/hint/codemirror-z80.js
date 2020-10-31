@@ -1,13 +1,14 @@
 'use strict'
 
-import CodeMirror from 'codemirror'
-
 /**
  * z80 code hinting for codemirror 5.
+ *
  * rob andrews <rob@aphlor.org>
  *
- * thanks to the opcode table at https://clrhome.org/table/
+ * thanks to the opcode table at https://clrhome.org/table/, the fuse emulator
  */
+
+ import CodeMirror from 'codemirror'
 
 ((codemirror) => {
   // block level so as not to pollute global space

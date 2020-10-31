@@ -1,5 +1,11 @@
 'use strict'
 
+/**
+ * angular core application for zedide's frontend interface.
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/z80/z80.js'

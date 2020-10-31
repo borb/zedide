@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 'use strict'
 
+/**
+ * translate from philip kendall's opcode data files into javascript to be spliced into ProcessorZ80 class.
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 import fs from 'fs'
 import path from 'path'
 

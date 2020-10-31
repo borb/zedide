@@ -1,5 +1,11 @@
 'use strict'
 
+/**
+ * webpack configuration for zedide frontend
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 const webpack = require('webpack')
 const path = require('path')
 

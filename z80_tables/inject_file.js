@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 'use strict'
 
+/**
+ * simple tool to inject a file into another file between two markers
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 import fs from 'fs'
 
-/**
- * inject a file into another file between two markers
- */
 const [destination, injectFile, startmark, endmark] = [process.argv[2], process.argv[3], process.argv[4], process.argv[5]]
 
 // read destination

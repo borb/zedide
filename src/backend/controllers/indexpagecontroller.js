@@ -1,5 +1,7 @@
 /**
  * index controller
+ *
+ * rob andrews <rob@aphlor.org>
  */
 
 const index = (req, res) => {

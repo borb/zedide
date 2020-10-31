@@ -1,3 +1,9 @@
+/**
+ * zedide web services application base.
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 import { dirname, join } from 'path'
 import cookieParser from 'cookie-parser'
 import createError from 'http-errors'

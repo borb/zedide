@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Module dependencies.
+ * express application launcher
+ *
+ * authored by the express-cli team
+ * ported to es6+esm by rob andrews <rob@aphlor.org>
  */
 
 import app from '../app.js'
