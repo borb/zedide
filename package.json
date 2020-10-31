@@ -1,6 +1,6 @@
 {
-  "name": "web-z80-ide",
-  "version": "0.0.1",
+  "name": "zedide",
+  "version": "0.2.0",
   "description": "an ide for writing, running and debugging z80 asm on the web",
   "main": "index.js",
   "type": "module",
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com:borb/web-z80-ide.git"
+    "url": "github.com:borb/zedide.git"
   },
   "author": "rob andrews <rob@aphlor.org>",
   "license": "CC-BY-SA-4.0",

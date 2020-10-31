@@ -26,10 +26,10 @@ let application
 document.addEventListener('DOMContentLoaded', () => {
   // bootstrap angularjs
   angular.element(() => {
-    angular.bootstrap(document, ['webZ80Ide'])
+    angular.bootstrap(document, ['zedide'])
   })
 
-  application = angular.module('webZ80Ide', ['ngSanitize'])
+  application = angular.module('zedide', ['ngSanitize'])
 
   // register a filter that allows us to retain newlines when outputting text
   application.filter('nl2br', ['$sanitize', ($sanitize) => {

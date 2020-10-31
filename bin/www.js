@@ -11,7 +11,7 @@ import app from '../app.js'
 import debugjs from 'debug'
 import http from 'http'
 
-const debug = debugjs('web-z80-ide:server')
+const debug = debugjs('zedide:server')
 
 /**
  * Get port from environment and store in Express.
