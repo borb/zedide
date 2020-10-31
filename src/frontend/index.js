@@ -2,17 +2,17 @@
 
 import CodeMirror from 'codemirror'
 import 'codemirror/lib/codemirror.css'
-import 'codemirror/mode/z80/z80'
-import 'codemirror/addon/hint/show-hint'
+import 'codemirror/mode/z80/z80.js'
+import 'codemirror/addon/hint/show-hint.js'
 import 'codemirror/addon/hint/show-hint.css'
-import ASM from 'asm80/asm'
-import Monolith from 'asm80/monolith'
-import hextools from 'asm80/hextools'
+import ASM from 'asm80/asm.js'
+import Monolith from 'asm80/monolith.js'
+import hextools from 'asm80/hextools.js'
 import angular from 'angular'
 import 'angular-sanitize'
 
-import './hint/codemirror-z80'
-import ProcessorZ80 from './cpu/z80'
+import './hint/codemirror-z80.js'
+import ProcessorZ80 from './cpu/z80.js'
 
 let application
 
