@@ -16,6 +16,7 @@ import Monolith from 'asm80/monolith.js'
 import hextools from 'asm80/hextools.js'
 import angular from 'angular'
 import 'angular-sanitize'
+import MemoryMap from 'nrf-intel-hex'
 
 import './hint/codemirror-z80.js'
 import ProcessorZ80 from './cpu/z80.js'
@@ -105,14 +106,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $scope.doCompile = (source) => {
       let [error, build, symbols] = ASM.compile(source, Monolith.Z80)
-      if (error === null) {
-        let hex = ASM.hex(build[0])
-        return hextools.hex2bin(hex, 0, Math.pow(2, 16) - 1)
-      }
+      if (error === null)
+        return $scope.createContiguousMemoryBlock(ASM.hex(build[0]))
+
       // an error during compilation
       $scope.outputMessages += `Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')\n`
       console.log(error)
       return false
+    }
+
+    $scope.createContiguousMemoryBlock = (intelHex) => {
+      const compiledBinary = MemoryMap.fromHex(intelHex)
+      return compiledBinary.slicePad(0, Math.pow(2, 16), 0)
     }
 
     $scope.run = () => {
@@ -136,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     $scope.assemble = () => {
-      let binary = $scope.doCompile($scope.codeMirror.getValue())
+      let code = $scope.codeMirror.getValue()
+      let binary = $scope.doCompile(code)
       if (binary !== false) {
         // setup the cpu with the built program
         $scope.cpu = new ProcessorZ80(binary)
