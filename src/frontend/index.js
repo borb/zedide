@@ -50,6 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
     $scope.running = false
     $scope.timer = false
     $scope.dirty = true
+    $scope.pcToLineMap = []
+    $scope.lastLine = null
 
     $scope.cpu = undefined
 
@@ -57,8 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('code-editor'),
       {
         lineNumbers: true,
+        styleActiveLine: true,
+        styleActiveSelected: true,
         extraKeys: {
-          "Ctrl-Space": "autocomplete"
+          'Ctrl-Space': 'autocomplete'
         },
         mode: 'z80'
       }
@@ -68,24 +72,24 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     $scope.regs = {
-      pc: 'na',
-      sp: 'na',
-      a: 'na',
-      af: 'na',
-      a2: 'na',
-      af2: 'na',
-      bc: 'na',
-      bc2: 'na',
-      de: 'na',
-      de2: 'na',
-      hl: 'na',
-      hl2: 'na',
-      ix: 'na',
-      iy: 'na',
-      i: 'na',
-      r: 'na',
-      im: 'na',
-      flags: 'na'
+      pc: '--',
+      sp: '--',
+      a: '--',
+      af: '--',
+      a2: '--',
+      af2: '--',
+      bc: '--',
+      bc2: '--',
+      de: '--',
+      de2: '--',
+      hl: '--',
+      hl2: '--',
+      ix: '--',
+      iy: '--',
+      i: '--',
+      r: '--',
+      im: '--',
+      flags: '--'
     }
 
     $scope.updateRegisters = (regs) => {
@@ -113,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     $scope.doCompile = (source) => {
       let [error, build, symbols] = ASM.compile(source, Monolith.Z80)
+      $scope.pcToLineMap = $scope.translateParserDataIntoLineMap(build[0])
       if (error === null)
         return $scope.createContiguousMemoryBlock(ASM.hex(build[0]))
 
@@ -120,6 +125,23 @@ document.addEventListener('DOMContentLoaded', () => {
       $scope.outputMessages += `Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')\n`
       console.log(error)
       return false
+    }
+
+    /**
+     * take asm80's build parser data and create an array matching addresses to line numbers.
+     *
+     * @param array parserData  asm80's build data from ASM.compile(data)[1][0]
+     * @return array
+     */
+    $scope.translateParserDataIntoLineMap = (parserData) => {
+      let lineMap = []
+      parserData.forEach((parsedItem) => {
+        if (parsedItem.bytes === 0)
+          return
+
+        lineMap[parsedItem.addr] = parsedItem.numline
+      })
+      return lineMap
     }
 
     /**
@@ -199,9 +221,19 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     $scope.step = () => {
       const update = () => {
-        if ($scope.regs.pc === 'na') {
+        if ($scope.regs.pc === '--') {
           $scope.outputMessages += 'Cannot step through program until it has been built: Please click "Assemble"\n'
           return
+        }
+
+        // highlight the current line in the code from the program counter
+        if ($scope.lastLine !== null)
+          $scope.codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
+
+        $scope.lastLine = $scope.pcToLineMap[$scope.cpu.getRegisters().pc] ?? null // because self-modifying code can happen
+        if ($scope.lastLine !== null) {
+          $scope.codeMirror.scrollIntoView({line: $scope.lastLine}, 40)
+          $scope.codeMirror.addLineClass($scope.lastLine - 1, 'background', 'line-pc')
         }
 
         try {
@@ -211,7 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
           $scope.outputMessages += `${e}\n`
           $scope.running = false
         }
-        $scope.updateRegisters($scope.cpu.getRegisters())
+
+        const regs = $scope.cpu.getRegisters()
+        $scope.updateRegisters(regs)
 
         if ($scope.running)
           $scope.timer = setTimeout($scope.step, 400)

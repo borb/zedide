@@ -1,0 +1,59 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+div.editor {
+    margin: 0;
+    padding: 5px 5px 5px 5px;
+    box-sizing: border-box;
+    border: 1px solid red;
+    height: 100%;
+    width: 80%;
+    float: left;
+}
+
+div.toolkit {
+    margin: 0;
+    padding: 5px 5px 5px 5px;
+    box-sizing: border-box;
+    height: 100%;
+    width: 20%;
+    float: right;
+    border: 1px solid blue;
+}
+
+pre.cpu-output {
+    margin: 0;
+    padding: 5px 5px 5px 5px;
+    width: 100%;
+    border: 1px solid magenta;
+    clear: both;
+}
+
+div.output-messages {
+    margin: 0;
+    padding: 5px 5px 5px 5px;
+    width: 100%;
+    border: 1px solid green;
+    clear: both;
+}
+
+.CodeMirror {
+    font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+    font-size: 18px;
+}
+
+table {
+    border: 1px solid black;
+    width: 100%;
+}
+
+table tr th {
+    text-align: left;
+    border: 1px solid grey;
+}
+
+.line-pc {
+    background: lightslategrey !important;
+}
