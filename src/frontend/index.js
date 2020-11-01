@@ -104,6 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
       $scope.regs.flags = flags
     }
 
+    /**
+     * assemble the source code, returning a Uint8Array memory block.
+     * if an error occurs, return false a fill the messges buffer with a message.
+     *
+     * @param string  source  The source code to assemble
+     * @return Uint8Array|false
+     */
     $scope.doCompile = (source) => {
       let [error, build, symbols] = ASM.compile(source, Monolith.Z80)
       if (error === null)
@@ -115,11 +122,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return false
     }
 
+    /**
+     * create a contiguous memory block, 64KB in size, for the cpu to run.
+     * accepts an intel hex format file as input.
+     *
+     * @param string  intelHex  Intel hex format assembled code
+     * @return Uint8Array
+     */
     $scope.createContiguousMemoryBlock = (intelHex) => {
       const compiledBinary = MemoryMap.fromHex(intelHex)
       return compiledBinary.slicePad(0, Math.pow(2, 16), 0)
     }
 
+    /**
+     * run the code by setting the running value so that the timer will renew
+     * after opcode execution.
+     *
+     * @return undefined
+     */
     $scope.run = () => {
       if ($scope.dirty)
         $scope.outputMessages += `WARNING: Buffer has changed since last assembly - consider stopping and reassembling\n`
@@ -127,12 +147,24 @@ document.addEventListener('DOMContentLoaded', () => {
       $scope.step()
     }
 
+    /**
+     * stop execution; clear the timer and set the running flag to false
+     *
+     * @return undefined
+     */
     $scope.stop = () => {
       $scope.running = false
       clearTimeout($scope.timer)
       $scope.timer = false
     }
 
+    /**
+     * an i/o handler for ProcessorZ80 - add some data to the <pre> buffer
+     *
+     * @param string  mode  'r' or 'w' for read or write, respectively
+     * @param string  data  Data to put in the buffer
+     * @return undefined
+     */
     $scope.cpuPreArea = (mode, data) => {
       if (mode === 'r')
         return 0x00
@@ -140,6 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
       $scope.cpuOutput += String.fromCharCode(data)
     }
 
+    /**
+     * assemble the source code from the editor and bootstrap the simulated cpu
+     *
+     * @return undefined
+     */
     $scope.assemble = () => {
       let code = $scope.codeMirror.getValue()
       let binary = $scope.doCompile(code)
@@ -155,6 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    /**
+     * single step an instruction from memory; runs the fetch-execute cycle
+     *
+     * @return undefined
+     */
     $scope.step = () => {
       const update = () => {
         if ($scope.regs.pc === 'na') {
