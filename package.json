@@ -5,11 +5,13 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
-    "build:dev": "webpack --debug",
-    "start": "node ./bin/www.js",
-    "start:dev": "webpack serve",
+    "build": "NODE_ENV=production webpack",
+    "start": "NODE_ENV=production node ./bin/www.js",
+
+    "build:dev": "NODE_ENV=development webpack",
+    "start:dev": "NODE_ENV=development webpack serve",
+
+    "generate:opcodes": "npm run-script opcodes:base && npm run-script opcodes:cb && npm run-script opcodes:dd && npm run-script opcodes:ed && npm run-script opcodes:fd && npm run-script opcodes:ddcb && npm run-script opcodes:fdcb && npm run-script opcodes:combine",
     "opcodes:base": "z80_tables/translate_z80_tables.js z80_tables/opcodes_base.dat z80_tables/build/00_opcodes_base.js",
     "opcodes:cb": "z80_tables/translate_z80_tables.js z80_tables/opcodes_cb.dat z80_tables/build/01_opcodes_cb.js cb",
     "opcodes:dd": "z80_tables/translate_z80_tables.js z80_tables/opcodes_ddfd.dat z80_tables/build/02_opcodes_dd.js dd ix",
@@ -17,9 +19,10 @@
     "opcodes:fd": "z80_tables/translate_z80_tables.js z80_tables/opcodes_ddfd.dat z80_tables/build/04_opcodes_fd.js fd iy",
     "opcodes:ddcb": "z80_tables/translate_z80_tables.js z80_tables/opcodes_ddfdcb.dat z80_tables/build/05_opcodes_ddcb.js ddcb ix",
     "opcodes:fdcb": "z80_tables/translate_z80_tables.js z80_tables/opcodes_ddfdcb.dat z80_tables/build/06_opcodes_fdcb.js fdcb iy",
-    "generate:opcodes": "npm run-script opcodes:base && npm run-script opcodes:cb && npm run-script opcodes:dd && npm run-script opcodes:ed && npm run-script opcodes:fd && npm run-script opcodes:ddcb && npm run-script opcodes:fdcb && npm run-script opcodes:combine",
     "opcodes:combine": "ls z80_tables/build/[0-9]* | sort | xargs cat > z80_tables/build/opcodes.js",
-    "opcodes:splice": "z80_tables/inject_file.js src/frontend/cpu/z80.js z80_tables/build/opcodes.js '// START: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*' '// END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*'"
+    "opcodes:splice": "z80_tables/inject_file.js src/frontend/cpu/z80.js z80_tables/build/opcodes.js '// START: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*' '// END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*'",
+
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

@@ -11,7 +11,7 @@ const path = require('path')
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  devtool: 'inline-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? 'none' : 'inline-source-map',
   entry: {
     frontend: './src/frontend/index.js'
   },
