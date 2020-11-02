@@ -21,7 +21,7 @@ import MemoryMap from 'nrf-intel-hex'
 import './hint/codemirror-z80.js'
 import ProcessorZ80 from './cpu/z80.js'
 
-let application
+let app
 
 // setup the angular application
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,10 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     angular.bootstrap(document, ['zedide'])
   })
 
-  application = angular.module('zedide', ['ngSanitize'])
+  app = angular.module('zedide', ['ngSanitize'])
 
   // register a filter that allows us to retain newlines when outputting text
-  application.filter('nl2br', ['$sanitize', ($sanitize) => {
+  app.filter('nl2br', ['$sanitize', ($sanitize) => {
     return (input) => {
       return $sanitize(
         input
@@ -44,7 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }])
 
-  application.controller('ideController', ['$scope', '$http', ($scope, $http) => {
+  /**
+   * application controller for the index page.
+   */
+  app.controller('ideController', ['$scope', '$http', ($scope, $http) => {
     $scope.outputMessages = 'Welcome!\n'
     $scope.cpuOutput = ''
     $scope.running = false
@@ -92,6 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
       flags: '--'
     }
 
+    /**
+     * update the registers in $scope which are bound to the register display table in
+     * the user interface.
+     * mostly this reformats in hex and breaks the cpu flags out to binary.
+     *
+     * @param array regs  Array of registers from ProcessorZ80.getRegisters()
+     * @return undefined
+     */
     $scope.updateRegisters = (regs) => {
       // pull the left 8 bits of af into a
       regs.a = (regs.af >> 8) & 0xff
