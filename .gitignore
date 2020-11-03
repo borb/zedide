@@ -1,3 +1,4 @@
 /node_modules
 /public/js/*.bundle.js
+/public/js/*.bundle.js.LICENSE.txt
 /z80_tables/build/*

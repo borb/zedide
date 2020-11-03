@@ -8,10 +8,19 @@
 
 const webpack = require('webpack')
 const path = require('path')
+const TerserPlugin = require('terser-webpack-plugin')
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  devtool: process.env.NODE_ENV === 'production' ? 'none' : 'inline-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? false : 'inline-source-map',
+  optimization: {
+    minimize: process.env.NODE_ENV === 'production' ? true : false,
+    minimizer: [
+      new TerserPlugin({
+        test: /\.js(\?.*)?$/i
+      })
+    ]
+  },
   entry: {
     frontend: './src/frontend/index.js'
   },
