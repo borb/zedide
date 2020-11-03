@@ -1,0 +1,36 @@
+html, body {
+    min-height: 10vh;
+    height: 100vh;
+}
+
+div.top {
+    height: 100%;
+}
+
+div.editor-ctrl {
+    height: 80vh;
+}
+
+div.output-ctrl {
+    height: 20vh;
+    vertical-align: text-bottom;
+}
+
+.CodeMirror {
+    font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+    font-size: 18px;
+    height: 80vh;
+}
+
+.register-label {
+    writing-mode: vertical-lr;
+}
+
+tt {
+    font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+    font-size: 16px;
+}
+
+.line-pc {
+    background: lightslategrey !important;
+}

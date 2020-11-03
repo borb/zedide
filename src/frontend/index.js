@@ -22,6 +22,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 
 import './hint/codemirror-z80.js'
 import ProcessorZ80 from './cpu/z80.js'
+import './style/zedide.css'
 
 let app
 

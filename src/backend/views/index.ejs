@@ -8,10 +8,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	</head>
 	<body ng-controller="ideController">
-		<div class="container-fluid" style="height: 100%">
+		<div class="container-fluid top">
 
 			<!-- editor and toolbox -->
-			<div class="row align-items-start">
+			<div class="row editor-ctrl">
 				<div class="col-9">
 					<textarea id="code-editor">
 	.org $0000
@@ -66,16 +66,25 @@ loop:
 				</div>
 				<div class="col-3">
 					<h5>Actions</h5>
-					<p>
-						<button class="btn btn-primary" id="assemble" ng-click="assemble()">Assemble</button>
-						<button class="btn btn-info" id="save" ng-click="save()" disabled>Save</button>
-					</p>
+					<div class="container-fluid">
+						<div class="form-row">
+							<div class="col"><button class="form-control btn btn-primary" id="assemble" ng-click="assemble()">Assemble</button></div>
+							<div class="col"><button class="form-control btn btn-info" id="save" ng-click="save()" disabled>Save</button></div>
+						</div>
+					</div>
+
+					<hr/>
+
 					<h5>Program control</h5>
-					<p>
-						<button class="btn btn-primary" id="run" ng-click="run()">Run</button>
-						<button class="btn btn-warning" id="step" ng-click="step()">Step</button>
-						<button class="btn btn-danger" id="stop" ng-click="stop()">Stop</button>
-					</p>
+					<div class="container-fluid">
+						<div class="form-row">
+							<div class="col"><button class="form-control btn btn-primary" id="run" ng-click="run()">Run</button></div>
+							<div class="col"><button class="form-control btn btn-warning" id="step" ng-click="step()">Step</button></div>
+							<div class="col"><button class="form-control btn btn-danger" id="stop" ng-click="stop()">Stop</button></div>
+						</div>
+					</div>
+
+					<hr/>
 
 					<!-- register table -->
 					<h5>Registers</h5>
@@ -87,10 +96,10 @@ loop:
 							<div class="col-3">Interrupts?</div>
 						</div>
 						<div class="row">
-							<div class="col-3">{{ regs.pc }}</div>
-							<div class="col-3">{{ regs.sp }}</div>
-							<div class="col-3">{{ regs.im }}</div>
-							<div class="col-3">{{ regs.interrupts }}</div>
+							<div class="col-3"><tt>{{ regs.pc }}</tt></div>
+							<div class="col-3"><tt>{{ regs.sp }}</tt></div>
+							<div class="col-3"><tt>{{ regs.im }}</tt></div>
+							<div class="col-3"><tt>{{ regs.interrupts }}</tt></div>
 						</div>
 						<div class="row">
 							<div class="col-3">A</div>
@@ -99,10 +108,10 @@ loop:
 							<div class="col-3">HL</div>
 						</div>
 						<div class="row">
-							<div class="col-3">{{ regs.a }}</div>
-							<div class="col-3">{{ regs.bc }}</div>
-							<div class="col-3">{{ regs.de }}</div>
-							<div class="col-3">{{ regs.hl }}</div>
+							<div class="col-3"><tt>{{ regs.a }}</tt></div>
+							<div class="col-3"><tt>{{ regs.bc }}</tt></div>
+							<div class="col-3"><tt>{{ regs.de }}</tt></div>
+							<div class="col-3"><tt>{{ regs.hl }}</tt></div>
 						</div>
 						<div class="row">
 							<div class="col-3">A'</div>
@@ -111,10 +120,10 @@ loop:
 							<div class="col-3">HL'</div>
 						</div>
 						<div class="row">
-							<div class="col-3">{{ regs.a2 }}</div>
-							<div class="col-3">{{ regs.bc2 }}</div>
-							<div class="col-3">{{ regs.de2 }}</div>
-							<div class="col-3">{{ regs.hl2 }}</div>
+							<div class="col-3"><tt>{{ regs.a2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.bc2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.de2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.hl2 }}</tt></div>
 						</div>
 						<div class="row">
 							<div class="col-3">IX</div>
@@ -123,12 +132,14 @@ loop:
 							<div class="col-3">R</div>
 						</div>
 						<div class="row">
-							<div class="col-3">{{ regs.ix }}</div>
-							<div class="col-3">{{ regs.iy }}</div>
-							<div class="col-3">{{ regs.i }}</div>
-							<div class="col-3">{{ regs.r }}</div>
+							<div class="col-3"><tt>{{ regs.ix }}</tt></div>
+							<div class="col-3"><tt>{{ regs.iy }}</tt></div>
+							<div class="col-3"><tt>{{ regs.i }}</tt></div>
+							<div class="col-3"><tt>{{ regs.r }}</tt></div>
 						</div>
 					</div>
+
+					<hr/>
 
 					<!-- cpu flags -->
 					<h5>CPU flags</h5>
@@ -157,7 +168,7 @@ loop:
 				</div>
 			</div>
 
-			<div class="row align-items-end">
+			<div class="row output-ctrl">
 				<div class="container-fluid">
 					<!-- cpu output -->
 					<div class="row">
