@@ -26,6 +26,7 @@ JavaScript libraries for the excellent:
   * [express](https://expressjs.com/)
   * [ejs](https://ejs.co)
   * [webpack](https://webpack.js.org/)
+  * [bootstrap](https://getbootstrap.com/) (which in turn uses [jquery](https://jquery.com/) and [popper.js](https://popper.js.org/https://popper.js.org/))
 
 Were also used, and though they are not directly mentioned, their dependencies without which they would not work. And not forgetting the amazing [node.js](https://nodejs.org/). My most heartfelt thanks for everyone's hard work.
 

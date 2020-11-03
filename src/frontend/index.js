@@ -17,6 +17,8 @@ import hextools from 'asm80/hextools.js'
 import angular from 'angular'
 import 'angular-sanitize'
 import MemoryMap from 'nrf-intel-hex'
+import 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.css'
 
 import './hint/codemirror-z80.js'
 import ProcessorZ80 from './cpu/z80.js'
