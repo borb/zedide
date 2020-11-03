@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       i: '--',
       r: '--',
       im: '--',
-      flags: '--'
+      flags: '--------'
     }
 
     /**

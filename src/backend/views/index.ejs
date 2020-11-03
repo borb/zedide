@@ -1,12 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
-		<title>web-z80-ide prototype</title>
+		<title>ZedIDE: Z80 in a browser</title>
 		<link rel="stylesheet" href="/css/zedide.css" type="text/css" media="all" />
+
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	</head>
 	<body ng-controller="ideController">
-		<div class="editor">
-			<textarea id="code-editor">
+		<div class="container-fluid" style="height: 100%">
+
+			<!-- editor and toolbox -->
+			<div class="row align-items-start">
+				<div class="col-9">
+					<textarea id="code-editor">
 	.org $0000
 	ld a, $00
 
@@ -56,79 +63,126 @@ loop:
 	; this will only run if dec a results in z being set
 	jp z, loop
 </textarea>
+				</div>
+				<div class="col-3">
+					<h5>Actions</h5>
+					<p>
+						<button class="btn btn-primary" id="assemble" ng-click="assemble()">Assemble</button>
+						<button class="btn btn-info" id="save" ng-click="save()" disabled>Save</button>
+					</p>
+					<h5>Program control</h5>
+					<p>
+						<button class="btn btn-primary" id="run" ng-click="run()">Run</button>
+						<button class="btn btn-warning" id="step" ng-click="step()">Step</button>
+						<button class="btn btn-danger" id="stop" ng-click="stop()">Stop</button>
+					</p>
+
+					<!-- register table -->
+					<h5>Registers</h5>
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-3">PC</div>
+							<div class="col-3">SP</div>
+							<div class="col-3">IM</div>
+							<div class="col-3">Interrupts?</div>
+						</div>
+						<div class="row">
+							<div class="col-3">{{ regs.pc }}</div>
+							<div class="col-3">{{ regs.sp }}</div>
+							<div class="col-3">{{ regs.im }}</div>
+							<div class="col-3">{{ regs.interrupts }}</div>
+						</div>
+						<div class="row">
+							<div class="col-3">A</div>
+							<div class="col-3">BC</div>
+							<div class="col-3">DE</div>
+							<div class="col-3">HL</div>
+						</div>
+						<div class="row">
+							<div class="col-3">{{ regs.a }}</div>
+							<div class="col-3">{{ regs.bc }}</div>
+							<div class="col-3">{{ regs.de }}</div>
+							<div class="col-3">{{ regs.hl }}</div>
+						</div>
+						<div class="row">
+							<div class="col-3">A'</div>
+							<div class="col-3">BC'</div>
+							<div class="col-3">DE'</div>
+							<div class="col-3">HL'</div>
+						</div>
+						<div class="row">
+							<div class="col-3">{{ regs.a2 }}</div>
+							<div class="col-3">{{ regs.bc2 }}</div>
+							<div class="col-3">{{ regs.de2 }}</div>
+							<div class="col-3">{{ regs.hl2 }}</div>
+						</div>
+						<div class="row">
+							<div class="col-3">IX</div>
+							<div class="col-3">IY</div>
+							<div class="col-3">I</div>
+							<div class="col-3">R</div>
+						</div>
+						<div class="row">
+							<div class="col-3">{{ regs.ix }}</div>
+							<div class="col-3">{{ regs.iy }}</div>
+							<div class="col-3">{{ regs.i }}</div>
+							<div class="col-3">{{ regs.r }}</div>
+						</div>
+					</div>
+
+					<!-- cpu flags -->
+					<h5>CPU flags</h5>
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col-1 mx-auto text-right register-label">Sign</div>
+							<div class="col-1 mx-auto text-right register-label">Zero</div>
+							<div class="col-1 mx-auto text-right register-label">Bit 5</div>
+							<div class="col-1 mx-auto text-right register-label">Half</div>
+							<div class="col-1 mx-auto text-right register-label">Bit 3</div>
+							<div class="col-1 mx-auto text-right register-label">Parity</div>
+							<div class="col-1 mx-auto text-right register-label">Subtraction</div>
+							<div class="col-1 mx-auto text-right register-label">Carry</div>
+						</div>
+						<div class="row">
+							<div class="col-1 mx-auto text-left">{{ regs.flags[0] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[1] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[2] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[3] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[4] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[5] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[6] }}</div>
+							<div class="col-1 mx-auto text-left">{{ regs.flags[7] }}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row align-items-end">
+				<div class="container-fluid">
+					<!-- cpu output -->
+					<div class="row">
+						<div class="col-12">
+							<div class="form-group">
+								<label for="cpuOutput">CPU output port (port $0a)</label>
+								<textarea disabled id="cpuOutput" class="form-control" ng-bind="cpuOutput"></textarea>
+							</div>
+						</div>
+					</div>
+
+					<!-- assembler/control messages (and errors) -->
+					<div class="row">
+						<div class="col-12">
+							<div class="form-group">
+								<label for="controlMessages">Control messages</label>
+								<textarea disabled id="controlMessages" class="form-control" ng-bind="outputMessages"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
-		<div class="toolkit">
-			<h2>Control panel</h2>
-			<p>
-				<button id="assemble" ng-click="assemble()">Assemble</button>
-				<button id="save" ng-click="save()">Save</button>
-			</p>
-			<h2>Program control</h2>
-			<p>
-				<button id="step" ng-click="step()">Step</button>
-				<button id="run" ng-click="run()">Run</button>
-				<button id="stop" ng-click="stop()">Stop</button>
-			</p>
-			<table>
-				<tr>
-					<th>pc</th>
-					<th>sp</th>
-					<th>im</th>
-					<th>interrupts</th>
-				</tr>
-				<tr>
-					<td>{{ regs.pc }}</td>
-					<td>{{ regs.sp }}</td>
-					<td>{{ regs.im }}</td>
-					<td>{{ regs.interrupts }}</td>
-				</tr>
-				<tr>
-					<th>a</th>
-					<th>bc</th>
-					<th>de</th>
-					<th>hl</th>
-				</tr>
-				<tr>
-					<td>{{ regs.a }}</td>
-					<td>{{ regs.bc }}</td>
-					<td>{{ regs.de }}</td>
-					<td>{{ regs.hl }}</td>
-				</tr>
-				<tr>
-					<th>a'</th>
-					<th>bc'</th>
-					<th>de'</th>
-					<th>hl'</th>
-				</tr>
-				<tr>
-					<td>{{ regs.a2 }}</td>
-					<td>{{ regs.bc2 }}</td>
-					<td>{{ regs.de2 }}</td>
-					<td>{{ regs.hl2 }}</td>
-				</tr>
-				<tr>
-					<th>ix</th>
-					<th>iy</th>
-					<th>i</th>
-					<th>r</th>
-				</tr>
-				<tr>
-					<td>{{ regs.ix }}</td>
-					<td>{{ regs.iy }}</td>
-					<td>{{ regs.i }}</td>
-					<td>{{ regs.r }}</td>
-				</tr>
-			</table>
-			<table>
-				<tr>
-					<td>cpu flags</td>
-				</tr>
-				<tr><td><pre>sz5h3pnc</pre></td></tr>
-				<tr><td><pre>{{ regs.flags }}</pre></td></tr>
-			</table>
-		</div>
-		<pre class="cpu-output" ng-bind="cpuOutput"></pre>
-		<div class="output-messages" ng-bind-html="outputMessages | nl2br"></div>
+
+		<!-- load javascript after the page has finished loading -->
 		<script src="/js/frontend.bundle.js"></script>
 	</body>
 </html>
