@@ -131,13 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     $scope.doCompile = (source) => {
       let [error, build, symbols] = ASM.compile(source, Monolith.Z80)
-      $scope.pcToLineMap = $scope.translateParserDataIntoLineMap(build[0])
-      if (error === null)
+      if (error === null) {
+        $scope.pcToLineMap = $scope.translateParserDataIntoLineMap(build[0])
         return $scope.createContiguousMemoryBlock(ASM.hex(build[0]))
+      }
 
       // an error during compilation
       $scope.outputMessages += `Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')\n`
-      console.log(error)
+      console.error('Assembly failed', error)
       return false
     }
 
