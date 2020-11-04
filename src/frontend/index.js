@@ -11,6 +11,7 @@ import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/z80/z80.js'
 import 'codemirror/addon/hint/show-hint.js'
 import 'codemirror/addon/hint/show-hint.css'
+import 'codemirror/theme/dracula.css'
 import ASM from '@justnine/asm80/asm.js'
 import Monolith from '@justnine/asm80/monolith.js'
 import hextools from '@justnine/asm80/hextools.js'
@@ -19,6 +20,7 @@ import 'angular-sanitize'
 import MemoryMap from 'nrf-intel-hex'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
+import '@forevolve/bootstrap-dark/dist/css/bootstrap-dark.css'
 
 import './hint/codemirror-z80.js'
 import ProcessorZ80 from './cpu/z80.js'
@@ -70,7 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
         extraKeys: {
           'Ctrl-Space': 'autocomplete'
         },
-        mode: 'z80'
+        mode: 'z80',
+        theme: 'dracula'
       }
     )
     $scope.codeMirror.on('change', () => {

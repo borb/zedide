@@ -18,7 +18,7 @@ The Zilog Z80 CPU is a clone of the Intel 8080, which Intel encapsulated as a su
 
 Foremost, the opcode tables were borrowed from Philip Kendall's [FUSE emulator](http://fuse-emulator.sourceforge.net/) (a fantastic ZX Spectrum emulator); the perl-based z80.c generator helped explain some of the more arcane behaviours of flag handling, as well as the sign/zero/parity/even flag tables and a good number of the opcodes which I was unfamiliar with.
 
-JavaScript libraries for the excellent:
+JavaScript * CSS libraries:
   * [babel](https://babeljs.io)
   * [angularjs](https://angular.io/)
   * [asm80](https://github.com/maly/asm80-node)
@@ -27,6 +27,7 @@ JavaScript libraries for the excellent:
   * [ejs](https://ejs.co)
   * [webpack](https://webpack.js.org/)
   * [bootstrap](https://getbootstrap.com/) (which in turn uses [jquery](https://jquery.com/) and [popper.js](https://popper.js.org/https://popper.js.org/))
+  * [bootstrap-dark](https://github.com/ForEvolve/bootstrap-dark)
 
 Were also used, and though they are not directly mentioned, their dependencies without which they would not work. And not forgetting the amazing [node.js](https://nodejs.org/). My most heartfelt thanks for everyone's hard work.
 

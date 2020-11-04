@@ -34,6 +34,7 @@
   "dependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@forevolve/bootstrap-dark": "^1.0.0-alpha.1091",
     "@justnine/asm80": "^1.11.14-borb4",
     "angular": "^1.8.2",
     "angular-sanitize": "^1.8.2",
