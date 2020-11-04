@@ -222,6 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
         $scope.outputMessages = 'Build succeeded\n'
         $scope.cpuOutput = ''
         $scope.dirty = false
+
+        if ($scope.lastLine !== null)
+          $scope.codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
       }
     }
 
