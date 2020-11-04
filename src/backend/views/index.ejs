@@ -29,6 +29,7 @@ main:
 	; loop - load a byte from (hl); if zero, we're finished, otherwise write to port $0a
 loop:
 	ld a, (hl)
+	and a       ; ld a doesn't affect flags, but and does; use to set z if a=0
 	jp z, fin
 	out $0a, a
 	inc hl
