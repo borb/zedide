@@ -34,3 +34,8 @@ tt {
 .line-pc {
     background: lightslategrey !important;
 }
+
+div.register-row-label {
+    background-color: rgba(0, 98, 204, 0.15);
+    border-color: rgba(0, 86, 179, 0.2);
+}

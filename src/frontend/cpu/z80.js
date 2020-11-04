@@ -6131,6 +6131,16 @@ class ProcessorZ80
   }
 
   /**
+   * Get the state of interrupts
+   *
+   * @return boolean
+   */
+  getInterruptState()
+  {
+    return this.#interrupts
+  }
+
+  /**
    * Convert an opcode instruction table chain to a hex string
    *
    * @param array   callchain   The callchain to convert into a hex string

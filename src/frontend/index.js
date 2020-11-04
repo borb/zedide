@@ -16,7 +16,6 @@ import ASM from '@justnine/asm80/asm.js'
 import Monolith from '@justnine/asm80/monolith.js'
 import hextools from '@justnine/asm80/hextools.js'
 import angular from 'angular'
-import 'angular-sanitize'
 import MemoryMap from 'nrf-intel-hex'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -35,18 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
     angular.bootstrap(document, ['zedide'])
   })
 
-  app = angular.module('zedide', ['ngSanitize'])
+  app = angular.module('zedide', [])
 
-  // register a filter that allows us to retain newlines when outputting text
-  app.filter('nl2br', ['$sanitize', ($sanitize) => {
-    return (input) => {
-      return $sanitize(
-        input
-          .replace(/>/g, '&gt;')
-          .replace(/</g, '&lt;')
-          .replace(/\n/g, '<br/>')
-      )
-    }
+  app.filter('hexify', [() => (input, padding) => {
+    if (typeof input === 'undefined')
+      return '-'.repeat(padding)
+
+    const num = Number(input).toString(16)
+    return '0'.repeat(padding - num.length) + num
   }])
 
   /**
@@ -81,25 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     $scope.regs = {
-      pc: '--',
-      sp: '--',
-      a: '--',
-      af: '--',
-      a2: '--',
-      af2: '--',
-      bc: '--',
-      bc2: '--',
-      de: '--',
-      de2: '--',
-      hl: '--',
-      hl2: '--',
-      ix: '--',
-      iy: '--',
-      i: '--',
-      r: '--',
-      im: '--',
-      flags: '--------'
+      pc: undefined,
+      sp: undefined,
+      a: undefined,
+      af: undefined,
+      a2: undefined,
+      af2: undefined,
+      bc: undefined,
+      bc2: undefined,
+      de: undefined,
+      de2: undefined,
+      hl: undefined,
+      hl2: undefined,
+      ix: undefined,
+      iy: undefined,
+      i: undefined,
+      r: undefined,
+      im: undefined,
+      flags: undefined
     }
+    $scope.interrupts = undefined
 
     /**
      * update the registers in $scope which are bound to the register display table in
@@ -111,13 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     $scope.updateRegisters = (regs) => {
       // pull the left 8 bits of af into a
-      regs.a = (regs.af >> 8) & 0xff
-      regs.a2 = (regs.af2 >> 8) & 0xff
+      $scope.regs.a = (regs.af >> 8) & 0xff
+      $scope.regs.a2 = (regs.af2 >> 8) & 0xff
 
-      // format everything as hex
-      Object.keys(regs).forEach((key) => {
-        $scope.regs[key] = regs[key].toString(16)
-      })
+      $scope.regs = Object.assign($scope.regs, regs)
 
       // format the flags as bits
       let flags = (regs.af & 0x00ff).toString(2)
@@ -262,8 +255,8 @@ document.addEventListener('DOMContentLoaded', () => {
           $scope.running = false
         }
 
-        const regs = $scope.cpu.getRegisters()
-        $scope.updateRegisters(regs)
+        $scope.updateRegisters($scope.cpu.getRegisters())
+        $scope.interrupts = $scope.cpu.getInterruptState()
 
         if ($scope.running)
           $scope.timer = setTimeout($scope.step, 400)

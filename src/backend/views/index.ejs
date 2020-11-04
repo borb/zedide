@@ -87,53 +87,53 @@ loop:
 					<!-- register table -->
 					<h5>Registers</h5>
 					<div class="container-fluid">
-						<div class="row">
+						<div class="row register-row-label">
 							<div class="col-3">PC</div>
 							<div class="col-3">SP</div>
 							<div class="col-3">IM</div>
 							<div class="col-3">Interrupts?</div>
 						</div>
 						<div class="row">
-							<div class="col-3"><tt>{{ regs.pc }}</tt></div>
-							<div class="col-3"><tt>{{ regs.sp }}</tt></div>
-							<div class="col-3"><tt>{{ regs.im }}</tt></div>
-							<div class="col-3"><tt>{{ regs.interrupts }}</tt></div>
+							<div class="col-3"><tt>{{ regs.pc | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.sp | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.im | hexify:1 }}</tt></div>
+							<div class="col-3"><tt>{{ interrupts ? 'Yes' : 'No' }}</tt></div>
 						</div>
-						<div class="row">
+						<div class="row register-row-label">
 							<div class="col-3">A</div>
 							<div class="col-3">BC</div>
 							<div class="col-3">DE</div>
 							<div class="col-3">HL</div>
 						</div>
 						<div class="row">
-							<div class="col-3"><tt>{{ regs.a }}</tt></div>
-							<div class="col-3"><tt>{{ regs.bc }}</tt></div>
-							<div class="col-3"><tt>{{ regs.de }}</tt></div>
-							<div class="col-3"><tt>{{ regs.hl }}</tt></div>
+							<div class="col-3"><tt>{{ regs.a | hexify:2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.bc | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.de | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.hl | hexify:4 }}</tt></div>
 						</div>
-						<div class="row">
+						<div class="row register-row-label">
 							<div class="col-3">A'</div>
 							<div class="col-3">BC'</div>
 							<div class="col-3">DE'</div>
 							<div class="col-3">HL'</div>
 						</div>
 						<div class="row">
-							<div class="col-3"><tt>{{ regs.a2 }}</tt></div>
-							<div class="col-3"><tt>{{ regs.bc2 }}</tt></div>
-							<div class="col-3"><tt>{{ regs.de2 }}</tt></div>
-							<div class="col-3"><tt>{{ regs.hl2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.a2 | hexify:2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.bc2 | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.de2 | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.hl2 | hexify:4 }}</tt></div>
 						</div>
-						<div class="row">
+						<div class="row register-row-label">
 							<div class="col-3">IX</div>
 							<div class="col-3">IY</div>
 							<div class="col-3">I</div>
 							<div class="col-3">R</div>
 						</div>
 						<div class="row">
-							<div class="col-3"><tt>{{ regs.ix }}</tt></div>
-							<div class="col-3"><tt>{{ regs.iy }}</tt></div>
-							<div class="col-3"><tt>{{ regs.i }}</tt></div>
-							<div class="col-3"><tt>{{ regs.r }}</tt></div>
+							<div class="col-3"><tt>{{ regs.ix | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.iy | hexify:4 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.i | hexify:2 }}</tt></div>
+							<div class="col-3"><tt>{{ regs.r | hexify:2 }}</tt></div>
 						</div>
 					</div>
 
