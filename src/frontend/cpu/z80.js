@@ -3337,10 +3337,14 @@ class ProcessorZ80
     }
     // im 0
     this.#opcodes[0xed][0x46] = () => { this.#registers.im = 0 }
+    // im 0
+    this.#opcodes[0xed][0x66] = () => { this.#registers.im = 0 }
     // im 1
     this.#opcodes[0xed][0x56] = () => { this.#registers.im = 1 }
     // im 2
-    this.#opcodes[0xed][0x66] = () => { this.#registers.im = 2 }
+    this.#opcodes[0xed][0x5e] = () => { this.#registers.im = 2 }
+    // im 2
+    this.#opcodes[0xed][0x7e] = () => { this.#registers.im = 2 }
     // add iy,bc
     this.#opcodes[0xfd][0x09] = () => {
       this.#regops.iy(this.#add16(this.#regops.iy(), this.#regops.bc()))

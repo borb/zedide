@@ -3,5 +3,7 @@
 # these are in ADDITION to the same instructions in opcode_ed (actually, some in that file are undefined opcodes)
 
 0x46 IM 0
+0x66 IM 0
 0x56 IM 1
-0x66 IM 2
+0x5e IM 2
+0x7e IM 2
