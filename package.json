@@ -33,9 +33,9 @@
   "dependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@justnine/asm80": "^1.11.14-borb1",
     "angular": "^1.8.2",
     "angular-sanitize": "^1.8.2",
-    "asm80": "^1.11.14",
     "babel-loader": "^8.1.0",
     "bootstrap": "^4.5.3",
     "codemirror": "^5.58.2",
