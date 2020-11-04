@@ -98,6 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
     $scope.interrupts = undefined
 
     /**
+     * Add output to the outputMessages area
+     *
+     * @param string  message Message to add to buffer
+     * @return undefined
+     */
+    $scope.appendOutput = (message) => {
+      $scope.outputMessages += `${message}\n`
+      const om = document.getElementById('outputMessages')
+      om.scrollTop = om.scrollHeight
+    }
+
+    /**
      * update the registers in $scope which are bound to the register display table in
      * the user interface.
      * mostly this reformats in hex and breaks the cpu flags out to binary.
@@ -133,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // an error during compilation
-      $scope.outputMessages += `Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')\n`
+      $scope.appendOutput(`Build failed\n${error.msg} (at line ${error.s.numline}, '${error.s.line}')`)
       console.error('Assembly failed', error)
       return false
     }
@@ -175,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     $scope.run = () => {
       if ($scope.dirty)
-        $scope.outputMessages += `WARNING: Buffer has changed since last assembly - consider stopping and reassembling\n`
+      $scope.appendOutput(`WARNING: Buffer has changed since last assembly - consider stopping and reassembling`)
       $scope.running = true
       $scope.step()
     }
@@ -219,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         $scope.updateRegisters($scope.cpu.getRegisters())
         $scope.cpu.addIoHandler(10, $scope.cpuPreArea)
 
-        $scope.outputMessages = 'Build succeeded\n'
+        $scope.appendOutput('Build succeeded')
         $scope.cpuOutput = ''
         $scope.dirty = false
 
@@ -236,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $scope.step = () => {
       const update = () => {
         if ($scope.regs.pc === '--') {
-          $scope.outputMessages += 'Cannot step through program until it has been built: Please click "Assemble"\n'
+          $scope.appendOutput('Cannot step through program until it has been built: Please click "Assemble"')
           return
         }
 
@@ -254,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
           $scope.cpu.fetch()
           $scope.cpu.execute()
         } catch (e) {
-          $scope.outputMessages += `${e}\n`
+          $scope.appendOutput(e)
           $scope.running = false
         }
 
