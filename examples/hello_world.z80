@@ -1,13 +1,18 @@
+; sample program which writes "Hello, world!" to tty attached to io port $0a
+
+    ; at address $0, blank a & flags, jump to main program
 	.org $0000
 	ld bc, $0000
 	push bc
 	pop af
 	jp main
 
+    ; main program at $100, load message pointer into hl
 	.org $0100
 main:
 	ld hl, msg
 
+    ; loop - load a byte from (hl); if zero, we're finished, otherwise write to port $0a
 loop:
 	ld a, (hl)
 	jp z, fin
@@ -15,8 +20,10 @@ loop:
 	inc hl
 	jp loop
 
+    ; halt the cpu
 fin:
 	halt
 
+    ; our message: .cstr is "c-style null-terminated string"
 msg:
 	.cstr "Hello, world!"

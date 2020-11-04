@@ -12,54 +12,35 @@
 			<div class="row editor-ctrl">
 				<div class="col-9">
 					<textarea id="code-editor">
+; sample program which writes "Hello, world!" to tty attached to io port $0a
+
+	; at address $0, blank a & flags, jump to main program
 	.org $0000
-	ld a, $00
-
-loop:
-	; copy a into $f000, not $ffff as originally because that is the SP
-	ld ($f000), a
-	ld bc, $aabb
-	ld de, $ccdd
-	ld hl, $eeff
-
-	; play around with swapping between register banks
-	;exx
-	;ex af, af'
-
-	inc a
-
-	; cheat at resetting cpu flags
-	ld hl, $00
-	push hl
+	ld bc, $0000
+	push bc
 	pop af
+	jp main
 
-	; play with accumulator as a way of triggering z/c flags
-	ld a, $ff
-	add a, $00
-	;halt ; product here should be z unset c unset
+	; main program at $100, load message pointer into hl
+	.org $0100
+main:
+	ld hl, msg
 
-	; play with accumulator as a way of triggering z/c flags
-	ld a, $ff
-	add a, $01
-	;halt ; product here should be z set c set
+	; loop - load a byte from (hl); if zero, we're finished, otherwise write to port $0a
+loop:
+	ld a, (hl)
+	jp z, fin
+	out $0a, a
+	inc hl
+	jp loop
 
-	; play with accumulator as a way of triggering z/c flags
-	ld a, $ff
-	add a, $02
-	;halt ; product here should be z unset c set
-
-	; trigger zero flag to be set by loading ixh with 1 and deccing it
-	ld ixh, $01
-	dec ixh
-
-	; ix/iy load bit ops test
-	; no official syntax! erk!
-	ld iy, $0000
-	.db $fd, $cb, $00, $10 ; rl (iy+00) store in b
+	; halt the cpu
+fin:
 	halt
 
-	; this will only run if dec a results in z being set
-	jp z, loop
+	; our message: .cstr is "c-style null-terminated string"
+msg:
+	.cstr "Hello, world!"
 </textarea>
 				</div>
 				<div class="col-3">
