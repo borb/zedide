@@ -1,0 +1,48 @@
+	.org $0000
+	ld a, $00
+
+loop:
+	; copy a into $f000, not $ffff as originally because that is the SP
+	ld ($f000), a
+	ld bc, $aabb
+	ld de, $ccdd
+	ld hl, $eeff
+
+	; play around with swapping between register banks
+	;exx
+	;ex af, af'
+
+	inc a
+
+	; cheat at resetting cpu flags
+	ld hl, $00
+	push hl
+	pop af
+
+	; play with accumulator as a way of triggering z/c flags
+	ld a, $ff
+	add a, $00
+	;halt ; product here should be z unset c unset
+
+	; play with accumulator as a way of triggering z/c flags
+	ld a, $ff
+	add a, $01
+	;halt ; product here should be z set c set
+
+	; play with accumulator as a way of triggering z/c flags
+	ld a, $ff
+	add a, $02
+	;halt ; product here should be z unset c set
+
+	; trigger zero flag to be set by loading ixh with 1 and deccing it
+	ld ixh, $01
+	dec ixh
+
+	; ix/iy load bit ops test
+	; no official syntax! erk!
+	ld iy, $0000
+	.db $fd, $cb, $00, $10 ; rl (iy+00) store in b
+	halt
+
+	; this will only run if dec a results in z being set
+	jp z, loop

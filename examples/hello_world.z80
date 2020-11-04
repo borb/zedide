@@ -1,0 +1,22 @@
+	.org $0000
+	ld bc, $0000
+	push bc
+	pop af
+	jp main
+
+	.org $0100
+main:
+	ld hl, msg
+
+loop:
+	ld a, (hl)
+	jp z, fin
+	out $0a, a
+	inc hl
+	jp loop
+
+fin:
+	halt
+
+msg:
+	.cstr "Hello, world!"
