@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       i: undefined,
       r: undefined,
       im: undefined,
-      flags: undefined
+      flags: '--------'
     }
     $scope.interrupts = undefined
 

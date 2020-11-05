@@ -6,6 +6,36 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 	</head>
 	<body ng-controller="ideController">
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			<a class="navbar-brand" href="#">ZedIDE</a>
+
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menu" aria-controls="menu" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+
+			<div class="collapse navbar-collapse" id="menu">
+				<ul class="navbar-nav">
+					<li class="nav-item">
+						<a class="nav-link" href="#">Load</a>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="exampleMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Examples
+						</a>
+						<div class="dropdown-menu" aria-labelledby="exampleMenu">
+							<a class="dropdown-item" href="#">Hello world</a>
+							<a class="dropdown-item" href="#">Registers and loops</a>
+						</div>
+					</li>
+				</ul>
+			</div>
+
+			<form class="form-inline">
+				<button class="form-control btn btn-outline-primary mr-sm-2" id="assemble" ng-click="assemble()">Assemble</button>
+				<button class="form-control btn btn-outline-info my-2 my-sm-0" id="save" ng-click="save()" disabled>Save</button>
+			</form>
+		</nav>
+
 		<div class="container-fluid top">
 
 			<!-- editor and toolbox -->
@@ -45,16 +75,6 @@ msg:
 </textarea>
 				</div>
 				<div class="col-3">
-					<h5>Actions</h5>
-					<div class="container-fluid">
-						<div class="form-row">
-							<div class="col"><button class="form-control btn btn-primary" id="assemble" ng-click="assemble()">Assemble</button></div>
-							<div class="col"><button class="form-control btn btn-info" id="save" ng-click="save()" disabled>Save</button></div>
-						</div>
-					</div>
-
-					<hr/>
-
 					<h5>Program control</h5>
 					<div class="container-fluid">
 						<div class="form-row">
@@ -143,6 +163,15 @@ msg:
 							<div class="col-1 mx-auto text-left">{{ regs.flags[5] }}</div>
 							<div class="col-1 mx-auto text-left">{{ regs.flags[6] }}</div>
 							<div class="col-1 mx-auto text-left">{{ regs.flags[7] }}</div>
+						</div>
+					</div>
+
+					<hr/>
+
+					<!-- memory display -->
+					<h5>Memory</h5>
+					<div class="container-fluid">
+						<div class="row">
 						</div>
 					</div>
 				</div>
