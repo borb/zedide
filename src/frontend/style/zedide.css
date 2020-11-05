@@ -8,18 +8,20 @@ div.top {
 }
 
 div.editor-ctrl {
-    height: 80vh;
+    height: 75%;
 }
 
 div.output-ctrl {
-    height: 20vh;
-    vertical-align: text-bottom;
+    height: 20%;
+    vertical-align: bottom;
 }
 
 .CodeMirror {
     font-family: 'Roboto Mono', 'Cascadia Code', monospace;
     font-size: 18px;
-    height: 80vh;
+    height: 75%;
+    width: 72%;
+    position: fixed;
 }
 
 .register-label {

@@ -36,10 +36,9 @@
 			</form>
 		</nav>
 
-		<div class="container-fluid top">
-
+		<div class="container-fluid editor-ctrl relative-top">
 			<!-- editor and toolbox -->
-			<div class="row editor-ctrl">
+			<div class="row">
 				<div class="col-9">
 					<textarea id="code-editor">
 ; sample program which writes "Hello, world!" to tty attached to io port $0a
@@ -176,27 +175,25 @@ msg:
 					</div>
 				</div>
 			</div>
+		</div>
 
-			<div class="row output-ctrl">
-				<div class="container-fluid">
-					<!-- cpu output -->
-					<div class="row">
-						<div class="col-12">
-							<div class="form-group">
-								<label for="cpuOutput">CPU output port (port $0a)</label>
-								<textarea disabled id="cpuOutput" class="form-control" ng-bind="cpuOutput"></textarea>
-							</div>
-						</div>
+		<div class="container-fluid output-ctrl fixed-bottom">
+			<!-- cpu output -->
+			<div class="row">
+				<div class="col-12">
+					<div class="form-group">
+						<label for="cpuOutput">CPU output port (port $0a)</label>
+						<textarea disabled id="cpuOutput" class="form-control" ng-bind="cpuOutput"></textarea>
 					</div>
+				</div>
+			</div>
 
-					<!-- assembler/control messages (and errors) -->
-					<div class="row">
-						<div class="col-12">
-							<div class="form-group">
-								<label for="controlMessages">Control messages</label>
-								<textarea disabled id="outputMessages" class="form-control" ng-bind="outputMessages"></textarea>
-							</div>
-						</div>
+			<!-- assembler/control messages (and errors) -->
+			<div class="row">
+				<div class="col-12">
+					<div class="form-group">
+						<label for="controlMessages">Control messages</label>
+						<textarea disabled id="outputMessages" class="form-control" ng-bind="outputMessages"></textarea>
 					</div>
 				</div>
 			</div>
