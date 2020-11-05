@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
 html, body {
     min-height: 10vh;
     height: 100vh;
@@ -17,7 +19,7 @@ div.output-ctrl {
 }
 
 .CodeMirror {
-    font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+    font-family: 'Roboto Mono', monospace;
     font-size: 18px;
     height: 75%;
     width: 72%;
@@ -29,7 +31,7 @@ div.output-ctrl {
 }
 
 tt {
-    font-family: 'Roboto Mono', 'Cascadia Code', monospace;
+    font-family: 'Roboto Mono', monospace;
     font-size: 16px;
 }
 
