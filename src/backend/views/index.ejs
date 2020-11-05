@@ -73,7 +73,7 @@ msg:
 	.cstr "Hello, world!"
 </textarea>
 				</div>
-				<div class="col-3">
+				<div class="col-3 d-flex flex-column editor-ctrl">
 					<h5>Program control</h5>
 					<div class="container-fluid">
 						<div class="form-row">
@@ -169,8 +169,19 @@ msg:
 
 					<!-- memory display -->
 					<h5>Memory</h5>
-					<div class="container-fluid">
-						<div class="row">
+					<div class="container-fluid overflow-auto flex-grow-1">
+						<div class="row" ng-repeat="(addr, segment) in ram">
+							<!-- display memory dump within here -->
+							<a name="addr-{{ addr | hexify:4 }}"><tt>{{ addr | hexify:4 }}</tt></a>
+							&nbsp;:&nbsp;
+							<tt>
+								{{ segment[0] | hexify:2 }}{{ segment[1] | hexify:2 }}
+								{{ segment[2] | hexify:2 }}{{ segment[3] | hexify:2 }}
+								{{ segment[4] | hexify:2 }}{{ segment[5] | hexify:2 }}
+								{{ segment[6] | hexify:2 }}{{ segment[7] | hexify:2 }}
+							</tt>
+							&nbsp;&nbsp;
+							<span ng-bind-html="segment | displayChars"></span>
 						</div>
 					</div>
 				</div>

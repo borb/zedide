@@ -6145,6 +6145,16 @@ class ProcessorZ80
   }
 
   /**
+   * Return the contents of RAM
+   *
+   * @return Uint8Array
+   */
+  getRam()
+  {
+    return this.#ram
+  }
+
+  /**
    * Convert an opcode instruction table chain to a hex string
    *
    * @param array   callchain   The callchain to convert into a hex string

@@ -16,6 +16,7 @@ import ASM from '@justnine/asm80/asm.js'
 import Monolith from '@justnine/asm80/monolith.js'
 import hextools from '@justnine/asm80/hextools.js'
 import angular from 'angular'
+import 'angular-sanitize'
 import MemoryMap from 'nrf-intel-hex'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -34,14 +35,40 @@ document.addEventListener('DOMContentLoaded', () => {
     angular.bootstrap(document, ['zedide'])
   })
 
-  app = angular.module('zedide', [])
+  app = angular.module('zedide', ['ngSanitize'])
 
+  /**
+   * angular variable filter which displays a hexadecimal number with specific 0-padding.
+   *
+   * @param string  input   Number to format
+   * @param number  padding Expected number of characters
+   * @return string
+   */
   app.filter('hexify', [() => (input, padding) => {
     if (typeof input === 'undefined')
       return '-'.repeat(padding)
 
     const num = Number(input).toString(16)
     return '0'.repeat(padding - num.length) + num
+  }])
+
+  /**
+   * display a series of octets as ascii, hiding non-printable characters.
+   * this will output each character wrapped in <tt> tags.
+   *
+   * @param array charBytes Array of characters to display; typically this should be eight
+   * @return string
+   */
+  app.filter('displayChars', ['$sce', ($sce) => (charBytes) => {
+    let output = ''
+    charBytes.forEach((charByte) => {
+      if (charByte >= 32 && charByte <= 126) {
+        output += `<tt class="printable-char">${String.fromCharCode(charByte)}</tt>`
+        return
+      }
+      output += '<tt class="unprintable-char">.</tt>'
+    })
+    return $sce.trustAsHtml(output)
   }])
 
   /**
@@ -235,8 +262,27 @@ document.addEventListener('DOMContentLoaded', () => {
         $scope.cpuOutput = ''
         $scope.dirty = false
 
+        $scope.updateRamDisplay()
+
         if ($scope.lastLine !== null)
           $scope.codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
+      }
+    }
+
+    /**
+     * retrieve cpu ram and format it as an object where each element is a memory base address
+     * followed by an array of eight bytes from that location.
+     *
+     * @return undefined
+     */
+    $scope.updateRamDisplay = () => {
+      const ram = $scope.cpu.getRam()
+      $scope.ram = {}
+      for (let ramPtr = 0; ramPtr < Math.pow(2, 16); ramPtr++) {
+        let block = Math.floor(ramPtr / 8) * 8
+        if (typeof $scope.ram[block] === 'undefined')
+          $scope.ram[block] = []
+        $scope.ram[block].push(ram[ramPtr])
       }
     }
 
@@ -269,6 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
           $scope.appendOutput(e)
           $scope.running = false
         }
+
+        // update ram display after execution
+        $scope.updateRamDisplay()
 
         $scope.updateRegisters($scope.cpu.getRegisters())
         $scope.interrupts = $scope.cpu.getInterruptState()
