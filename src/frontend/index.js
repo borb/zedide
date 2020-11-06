@@ -85,8 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $scope.cpu = undefined
 
-    $scope.codeMirror = CodeMirror.fromTextArea(
-      document.getElementById('code-editor'),
+    const textArea = document.getElementById('code-editor')
+
+    $scope.codeMirror = CodeMirror(
+      (e) => textArea.parentNode.replaceChild(e, textArea),
       {
         lineNumbers: true,
         styleActiveLine: true,
@@ -95,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
           'Ctrl-Space': 'autocomplete'
         },
         mode: 'z80',
-        theme: 'dracula'
+        theme: 'dracula',
+        value: textArea.value
       }
     )
     $scope.codeMirror.on('change', () => {
