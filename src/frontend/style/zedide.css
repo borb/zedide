@@ -13,7 +13,6 @@ div.editor-ctrl {
     flex: auto;
     flex-direction: column;
     flex-grow: 1;
-    border: 1px solid green;
 }
 
 div.output-ctrl {
@@ -27,8 +26,6 @@ div.output-ctrl {
 .CodeMirror {
     font-family: 'Roboto Mono', monospace;
     font-size: 18px;
-    /* width: 100%;
-    height: 100%; */
     display: flex;
     flex: auto;
     flex-direction: column;
