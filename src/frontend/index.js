@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * application controller for the index page.
    */
   app.controller('ideController', ['$scope', '$http', ($scope, $http) => {
+    // variable defaults
     $scope.outputMessages = 'Welcome!\n'
     $scope.cpuOutput = ''
     $scope.running = false
@@ -84,26 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $scope.lastLine = null
 
     $scope.cpu = undefined
-
-    const textArea = document.getElementById('code-editor')
-
-    $scope.codeMirror = CodeMirror(
-      (e) => textArea.parentNode.replaceChild(e, textArea),
-      {
-        lineNumbers: true,
-        styleActiveLine: true,
-        styleActiveSelected: true,
-        extraKeys: {
-          'Ctrl-Space': 'autocomplete'
-        },
-        mode: 'z80',
-        theme: 'dracula',
-        value: textArea.value
-      }
-    )
-    $scope.codeMirror.on('change', () => {
-      $scope.dirty = true
-    })
 
     $scope.regs = {
       pc: undefined,
@@ -126,6 +107,63 @@ document.addEventListener('DOMContentLoaded', () => {
       flags: '--------'
     }
     $scope.interrupts = undefined
+
+    // setup the in-page editor, and the dirty buffer marker
+    const textArea = document.getElementById('code-editor')
+    $scope.codeMirror = CodeMirror(
+      (e) => textArea.parentNode.replaceChild(e, textArea),
+      {
+        lineNumbers: true,
+        styleActiveLine: true,
+        styleActiveSelected: true,
+        extraKeys: {
+          'Ctrl-Space': 'autocomplete'
+        },
+        mode: 'z80',
+        theme: 'dracula',
+        value: textArea.value
+      }
+    )
+    $scope.codeMirror.on('change', () => {
+      $scope.dirty = true
+    })
+
+    // get the list of samples on initial startup
+    $scope.samples = []
+
+    /**
+     * get the list of sample programs from the server
+     *
+     * @return undefined
+     */
+    $scope.getSamples = () => {
+      $http.get('/api/v1/samples')
+        .then(
+          (res) => $scope.samples = res.data.data,
+          () => {
+            // error
+            console.error('failed to read samples from server; check network request for more details')
+          }
+        )
+    }
+    $scope.getSamples()
+
+    /**
+     * load a sample from api and insert it into the buffer
+     *
+     * @return undefined
+     */
+    $scope.loadSample = (file) => {
+      $http.post('/api/v1/samples/read/', {file: file})
+        .then(
+          // success; load into the editor
+          (res) => $scope.codeMirror.setValue(res.data.data),
+          () => {
+            // failure
+            console.error(`failed to load sample '${file}' from server; check network request for more details`)
+          }
+        )
+    }
 
     /**
      * Add output to the outputMessages area

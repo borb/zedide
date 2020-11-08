@@ -23,8 +23,7 @@
 							Examples
 						</a>
 						<div class="dropdown-menu" aria-labelledby="exampleMenu">
-							<a class="dropdown-item" href="#">Hello world</a>
-							<a class="dropdown-item" href="#">Registers and loops</a>
+							<a class="dropdown-item" href="#" ng-click="loadSample(sample.file)" ng-repeat="sample in samples">{{ sample.meta.name }}</a>
 						</div>
 					</li>
 				</ul>
@@ -40,44 +39,13 @@
 			<!-- editor and toolbox -->
 			<div class="row">
 				<div class="col-9 d-flex flex-column">
-					<textarea id="code-editor" class="">
-; sample program which writes "Hello, world!" to tty attached to io port $0a
-
-	; at address $0, blank a & flags, jump to main program
-	.org $0000
-	ld bc, $0000
-	push bc
-	pop af
-	jp main
-
-	; main program at $100, load message pointer into hl
-	.org $0100
-main:
-	ld hl, msg
-
-	; loop - load a byte from (hl); if zero, we're finished, otherwise write to port $0a
-loop:
-	ld a, (hl)
-	and a       ; ld a doesn't affect flags, but and does; use to set z if a=0
-	jp z, fin
-	out $0a, a
-	inc hl
-	jp loop
-
-	; halt the cpu
-fin:
-	halt
-
-	; our message: .cstr is "c-style null-terminated string"
-msg:
-	.cstr "Hello, world!"
-</textarea>
+					<textarea id="code-editor" class=""></textarea>
 				</div>
 				<div class="col-3 d-flex flex-column editor-ctrl">
 					<h5>Program control</h5>
 					<div class="container-fluid">
 						<div class="form-row">
-							<div class="col"><button class="form-control btn btn-primary" id="run" ng-click="run()">Run</button></div>
+							<div class="col"><button class="form-control btn btn-success" id="run" ng-click="run()">Run</button></div>
 							<div class="col"><button class="form-control btn btn-warning" id="step" ng-click="step()">Step</button></div>
 							<div class="col"><button class="form-control btn btn-danger" id="stop" ng-click="stop()">Stop</button></div>
 						</div>
