@@ -13,6 +13,8 @@ const dsn = (typeof(process.env.MONGODB_URI) !== 'undefined')
   ? process.env.MONGODB_URI
   : 'mongodb://localhost/zedide'
 
+const sanitisedDsn = dsn.replace(/^(.*):\/\/(.*):.*@/, '$1://$2@')
+
 mongoose.connect(dsn, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -20,21 +22,21 @@ mongoose.connect(dsn, {
 
 // these three sections setup mongoose with message to log on connect/disconnect/error events
 mongoose.connection.on('connected', () => {
-  console.log(`connected to mongodb server [${dsn}]`)
+  console.log(`connected to mongodb server [${sanitisedDsn}]`)
 })
 
 mongoose.connection.on('error', (error) => {
-  console.error(`connection to mongodb server [${dsn}] failed: ${error}`)
+  console.error(`connection to mongodb server [${sanitisedDsn}] failed: ${error}`)
 })
 
 mongoose.connection.on('disconnected', () => {
-  console.log(`disconnected from mongodb server [${dsn}]`)
+  console.log(`disconnected from mongodb server [${sanitisedDsn}]`)
 })
 
 // when node receives a SIGINT, cleanly disconnect from mongodb
 process.on('SIGINT', () => {
   mongoose.connection.close(() => {
-    console.log(`process termination; disconnected from mongodb server [${dsn}]`)
+    console.log(`process termination; disconnected from mongodb server [${sanitisedDsn}]`)
     process.exit(0)
   })
 })
