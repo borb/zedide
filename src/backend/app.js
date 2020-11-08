@@ -10,7 +10,7 @@ import createError from 'http-errors'
 import express from 'express'
 import logger from 'morgan'
 
-import routes from './src/backend/routes.js'
+import routes from './routes.js'
 
 const app = express()
 
