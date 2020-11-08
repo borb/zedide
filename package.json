@@ -29,7 +29,7 @@
   "author": "rob andrews <rob@aphlor.org>",
   "license": "CC-BY-SA-4.0",
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=12.12.0"
   },
   "dependencies": {
     "@babel/core": "^7.12.3",
