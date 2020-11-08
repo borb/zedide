@@ -11,6 +11,7 @@ import express from 'express'
 import logger from 'morgan'
 
 import routes from './routes.js'
+import './mongoose-setup.js'
 
 const app = express()
 
