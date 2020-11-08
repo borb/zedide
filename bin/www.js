@@ -7,7 +7,7 @@
  * ported to es6+esm by rob andrews <rob@aphlor.org>
  */
 
-import app from '../app.js'
+import app from '../src/backend/app.js'
 import debugjs from 'debug'
 import http from 'http'
 
