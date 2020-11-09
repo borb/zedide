@@ -21,6 +21,7 @@ import MemoryMap from 'nrf-intel-hex'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
 import '@forevolve/bootstrap-dark/dist/css/bootstrap-dark.css'
+import $ from 'jquery'
 
 import './hint/codemirror-z80.js'
 import ProcessorZ80 from './cpu/z80.js'
@@ -108,9 +109,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     $scope.interrupts = undefined
 
+    // login details
+    const emptyLoginModel = {user: '', password: ''}
+    $scope.loginModel = angular.copy(emptyLoginModel)
+
+    // authorised user
+    $scope.authorisedUser = undefined
+
     // setup the in-page editor, and the dirty buffer marker
     const textArea = document.getElementById('code-editor')
-    $scope.codeMirror = CodeMirror(
+    const codeMirror = CodeMirror(
       (e) => textArea.parentNode.replaceChild(e, textArea),
       {
         lineNumbers: true,
@@ -124,29 +132,53 @@ document.addEventListener('DOMContentLoaded', () => {
         value: textArea.value
       }
     )
-    $scope.codeMirror.on('change', () => {
+    codeMirror.on('change', () => {
       $scope.dirty = true
     })
 
-    // get the list of samples on initial startup
-    $scope.samples = []
-
-    /**
-     * get the list of sample programs from the server
-     *
-     * @return undefined
-     */
-    $scope.getSamples = () => {
-      $http.get('/api/v1/samples')
-        .then(
-          (res) => $scope.samples = res.data.data,
-          () => {
-            // error
-            console.error('failed to read samples from server; check network request for more details')
-          }
-        )
+    // shortcuts to adjust page display; switchToLogout enables logout menu item and username display
+    const switchToLogout = () => {
+      $('#navbarLoginItem').addClass('menu-off')
+      $('#navbarLogoutItem').removeClass('menu-off')
+      $('#authuserDisplay').removeClass('menu-off')
     }
-    $scope.getSamples()
+
+    // ...and switchToLogin enables the login/signup menu, turns off logout and username display
+    const switchToLogin = () => {
+      $('#navbarLoginItem').removeClass('menu-off')
+      $('#navbarLogoutItem').addClass('menu-off')
+      $('#authuserDisplay').addClass('menu-off')
+    }
+
+    // check if the user is authorised and adjust the login/logout/signup navbar items
+    $http.get('/api/v1/auth/user')
+      .then(
+        (res) => {
+          // might be authorised
+          if (res.data.success) {
+            $scope.authorisedUser = res.data.user
+            return switchToLogout()
+          }
+
+          // if success was explicitly false or "falsey" then display login aspects
+          switchToLogin()
+        },
+        () => {
+          // probably not authorised; server returns non-200 codes; interpret all as "no auth"
+          switchToLogin()
+        }
+      )
+
+    // get the list of sample programs from the server
+    $scope.samples = []
+    $http.get('/api/v1/samples')
+      .then(
+        (res) => $scope.samples = res.data.data,
+        () => {
+          // error
+          console.error('failed to read samples from server; check network request for more details')
+        }
+      )
 
     /**
      * load a sample from api and insert it into the buffer
@@ -154,10 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * @return undefined
      */
     $scope.loadSample = (file) => {
-      $http.post('/api/v1/samples/read/', {file: file})
+      $http.post('/api/v1/samples/read', {file: file})
         .then(
           // success; load into the editor
-          (res) => $scope.codeMirror.setValue(res.data.data),
+          (res) => codeMirror.setValue(res.data.data),
           () => {
             // failure
             console.error(`failed to load sample '${file}' from server; check network request for more details`)
@@ -291,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @return undefined
      */
     $scope.assemble = () => {
-      let code = $scope.codeMirror.getValue()
+      let code = codeMirror.getValue()
       let binary = $scope.doCompile(code)
       if (binary !== false) {
         // setup the cpu with the built program
@@ -306,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         $scope.updateRamDisplay()
 
         if ($scope.lastLine !== null)
-          $scope.codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
+          codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
       }
     }
 
@@ -341,12 +373,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // highlight the current line in the code from the program counter
         if ($scope.lastLine !== null)
-          $scope.codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
+          codeMirror.removeLineClass($scope.lastLine - 1, 'background', 'line-pc')
 
         $scope.lastLine = $scope.pcToLineMap[$scope.cpu.getRegisters().pc] ?? null // because self-modifying code can happen
         if ($scope.lastLine !== null) {
-          $scope.codeMirror.scrollIntoView({line: $scope.lastLine}, 40)
-          $scope.codeMirror.addLineClass($scope.lastLine - 1, 'background', 'line-pc')
+          codeMirror.scrollIntoView({line: $scope.lastLine}, 40)
+          codeMirror.addLineClass($scope.lastLine - 1, 'background', 'line-pc')
         }
 
         try {
@@ -371,6 +403,57 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!$scope.$$phase)
         return $scope.$apply(update)
       update()
+    }
+
+    $scope.signup = () => {
+      if ($scope.loginModel.user == '' || $scope.loginModel.password == '') {
+        $('#signupFailureModal').modal('show')
+        return
+      }
+
+      $http.post('/api/v1/auth/signup', {
+        user: $scope.loginModel.user,
+        password: $scope.loginModel.password
+      }).then(
+        (res) => {
+          // post worked; api call may not have
+          if (res.data.success == false) {
+            $('#signupFailureModal').modal('show')
+            return
+          }
+
+          $scope.authorisedUser = $scope.loginModel.user
+          switchToLogout()
+        },
+        () => $('#signupFailureModal').modal('show')
+      )
+    }
+
+    $scope.login = () => {
+      if ($scope.loginModel.user == '' || $scope.loginModel.password == '') {
+        $('#loginFailureModal').modal('show')
+        return
+      }
+
+      $http.post('/api/v1/auth/login', {
+        user: $scope.loginModel.user,
+        password: $scope.loginModel.password
+      }).then(
+        (res) => {
+          // post worked; api call may not have
+          if (res.data.success == false) {
+            $('#loginFailureModal').modal('show')
+            return
+          }
+
+          $scope.authorisedUser = $scope.loginModel.user
+          switchToLogout()
+        },
+        () => $('#loginFailureModal').modal('show')
+      )
+    }
+
+    $scope.logout = () => {
     }
   }])
 })

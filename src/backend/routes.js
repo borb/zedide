@@ -6,6 +6,7 @@
 
 import express from 'express'
 
+import authapicontroller from './controllers/authapicontroller.js'
 import samplefileapicontroller from './controllers/samplefileapicontroller.js'
 
 const router = express.Router()
@@ -15,6 +16,9 @@ const apiRouter = express.Router()
 apiRouter
   .get('/samples', samplefileapicontroller.index)
   .post('/samples/read', samplefileapicontroller.read)
+  .post('/auth/signup', authapicontroller.signup, authapicontroller.login)
+  .post('/auth/login', authapicontroller.login)
+  .get('/auth/user', authapicontroller.isAuthenticated, authapicontroller.getAuthorisedUser)
 
 router.use('/api/v1', apiRouter)
 

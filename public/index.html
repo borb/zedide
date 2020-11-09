@@ -26,10 +26,46 @@
 							<a class="dropdown-item" href="#" ng-click="loadSample(sample.file)" ng-repeat="sample in samples">{{ sample.meta.name }}</a>
 						</div>
 					</li>
+					<li class="nav-item dropdown" id="navbarLoginItem">
+						<a class="nav-link dropdown-toggle" href="#" id="signupLogin" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Login/Signup
+						</a>
+						<div class="dropdown-menu login-menu" aria-labelledby="signupLogin">
+							<div class="container dropdown-item">
+								<div class="form-row">
+									<div class="form-group">
+										<label for="user">Username:</label>
+										<input id="user" type="text" class="form-control" ng-model="loginModel.user" value="{{ login.user }}" />
+									</div>
+								</div>
+								<div class="form-row">
+									<div class="form-group">
+										<label for="password">Password:</label>
+										<input id="password" type="password" class="form-control" ng-model="loginModel.password" />
+									</div>
+								</div>
+								<div class="form-row">
+									<form class="form-inline">
+										<div class="col"><button class="form-control btn btn-primary" ng-click="login()">Login</button></div>
+										<div class="col"><button class="form-control btn btn-warning" ng-click="signup()"">Signup</button></div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="nav-item" id="navbarLogoutItem">
+						<a class="nav-link" href="#" ng-click="logout()">Logout</a>
+					</li>
 				</ul>
 			</div>
 
 			<form class="form-inline">
+				<ul class="navbar-nav">
+					<li class="nav-item menu-off" id="authuserDisplay">
+						User: {{ authorisedUser }}
+					</li>
+				</ul>
+				&nbsp;
 				<button class="form-control btn btn-outline-primary mr-sm-2" id="assemble" ng-click="assemble()">Assemble</button>
 				<button class="form-control btn btn-outline-info my-2 my-sm-0" id="save" ng-click="save()" disabled>Save</button>
 			</form>
@@ -170,6 +206,50 @@
 				<div class="col-12 form-group">
 					<label for="controlMessages">Control messages</label>
 					<textarea disabled id="outputMessages" class="form-control" ng-bind="outputMessages"></textarea>
+				</div>
+			</div>
+		</div>
+
+		<!-- modal for signup failure -->
+		<div class="modal fade" id="signupFailureModal" tabindex="-1" role="dialog" aria-labelledby="signupFailureModalHeader" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="signupFailureModalHeader">Signup failed</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+
+					<div class="modal-body">
+						<div class="container">
+							<div class="row">
+								Error during signup. Please check your details.
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- modal for login failure -->
+		<div class="modal fade" id="loginFailureModal" tabindex="-1" role="dialog" aria-labelledby="loginFailureModalHeader" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loginFailureModalHeader">Login failed</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+
+					<div class="modal-body">
+						<div class="container">
+							<div class="row">
+								Login failed. Please check your email address and password.
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

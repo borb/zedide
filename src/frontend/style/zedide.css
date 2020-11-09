@@ -53,3 +53,11 @@ div.register-row-label {
 tt.unprintable-char {
     color: darkslategray;
 }
+
+div.login-menu {
+    width: 250px;
+}
+
+li.menu-off {
+    display: none;
+}

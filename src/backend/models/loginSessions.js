@@ -14,7 +14,7 @@ const loginSessionsSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  email: {
+  user: {
     type: String,
     required: true
   },
