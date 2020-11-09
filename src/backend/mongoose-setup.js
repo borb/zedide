@@ -17,7 +17,8 @@ const sanitisedDsn = dsn.replace(/^(.*):\/\/(.*):.*@/, '$1://$2@')
 
 mongoose.connect(dsn, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useCreateIndex: true
 })
 
 // these three sections setup mongoose with message to log on connect/disconnect/error events
