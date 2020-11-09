@@ -454,6 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     $scope.logout = () => {
+      $http.get('/api/v1/auth/logout').then(
+        (res) => {
+          // logout succeeded
+          switchToLogin()
+        },
+        () => $('#logoutFailureModal').modal('show')
+      )
     }
   }])
 })

@@ -223,9 +223,7 @@
 
 					<div class="modal-body">
 						<div class="container">
-							<div class="row">
-								Error during signup. Please check your details.
-							</div>
+							<div class="row">Error during signup. Please check your details.</div>
 						</div>
 					</div>
 				</div>
@@ -245,14 +243,32 @@
 
 					<div class="modal-body">
 						<div class="container">
-							<div class="row">
-								Login failed. Please check your email address and password.
-							</div>
+							<div class="row">Login failed. Please check your email address and password.</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+
+				<!-- modal for logout failure -->
+				<div class="modal fade" id="loginFailureModal" tabindex="-1" role="dialog" aria-labelledby="loginFailureModalHeader" aria-hidden="true">
+					<div class="modal-dialog modal-dialog-centered" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="loginFailureModalHeader">Login failed</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+
+							<div class="modal-body">
+								<div class="container">
+									<div class="row">Sorry, logout failed: Please check your connection and try again.</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
 		<!-- load javascript after the page has finished loading -->
 		<script src="/js/frontend.bundle.js"></script>

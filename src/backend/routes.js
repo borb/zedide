@@ -19,6 +19,7 @@ apiRouter
   .post('/auth/signup', authapicontroller.signup, authapicontroller.login)
   .post('/auth/login', authapicontroller.login)
   .get('/auth/user', authapicontroller.isAuthenticated, authapicontroller.getAuthorisedUser)
+  .get('/auth/logout', authapicontroller.isAuthenticated, authapicontroller.logout)
 
 router.use('/api/v1', apiRouter)
 

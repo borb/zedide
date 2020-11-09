@@ -109,15 +109,25 @@ const isAuthenticated = (req, res, next) => {
 }
 
 const getAuthorisedUser = (req, res) => {
+  // return the authorised user; this is logic-free since isAuthenticted does the heavy lifting
   res.json({
     success: true,
     user: res.locals.user.user
   })
 }
 
+const logout = (req, res) => {
+  const sessions = mongoose.model('loginSessions')
+  sessions.findOneAndDelete({sessionId: req.cookies.loginSession})
+  res
+    .clearCookie('loginSession')
+    .json({success: true})
+}
+
 export default {
   'signup': signup,
   'login': login,
   'isAuthenticated': isAuthenticated,
-  'getAuthorisedUser': getAuthorisedUser
+  'getAuthorisedUser': getAuthorisedUser,
+  'logout': logout
 }
