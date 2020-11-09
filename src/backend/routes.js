@@ -6,13 +6,9 @@
 
 import express from 'express'
 
-import indexpagecontroller from './controllers/indexpagecontroller.js'
 import samplefileapicontroller from './controllers/samplefileapicontroller.js'
 
 const router = express.Router()
-
-// index page
-router.get('/', indexpagecontroller)
 
 // api routes
 const apiRouter = express.Router()
