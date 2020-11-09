@@ -45,6 +45,9 @@ module.exports = {
     publicPath: '/js/',
     compress: true,
     host: '0.0.0.0',
-    port: 3000
+    port: 4000,
+    proxy: {
+      '/api': 'http://localhost:3000'
+    }
   }
 }
