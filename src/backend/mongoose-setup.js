@@ -1,6 +1,6 @@
 /**
  * setup connection to mongodb.
- * please update line 10 if your connection details vary.
+ * set MONGODB_URI in your environment if details vary
  * **DO NOT LEAVE AN UNAUTHENTICATED MONGODB PUBLICLY ACCESSIBLE**
  *
  * rob andrews <rob@aphlor.org>
