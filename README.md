@@ -28,8 +28,9 @@ JavaScript * CSS libraries:
   * [webpack](https://webpack.js.org/)
   * [bootstrap](https://getbootstrap.com/) (which in turn uses [jquery](https://jquery.com/) and [popper.js](https://popper.js.org/https://popper.js.org/))
   * [bootstrap-dark](https://github.com/ForEvolve/bootstrap-dark)
+  * [mongoose](https://github.com/mongodb/node-mongodb-native)
 
-Were also used, and though they are not directly mentioned, their dependencies without which they would not work. And not forgetting the amazing [node.js](https://nodejs.org/). My most heartfelt thanks for everyone's hard work.
+Were also used, and though they are not directly mentioned, their dependencies without which they would not work. And not forgetting the amazing [node.js](https://nodejs.org/) and [MongoDB](https://www.mongodb.com/). My most heartfelt thanks for everyone's hard work.
 
 ## License
 
