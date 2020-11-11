@@ -134,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $scope.localFileName = $scope.remoteFileName = $scope.fileName = ''
     $scope.localFiles = []
     $scope.remoteFiles = []
+    $scope.panelSide = 'local'
 
     // setup the in-page editor, and the dirty buffer marker
     const textArea = document.getElementById('code-editor')
@@ -522,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $scope.fileName = panel == 'remote'
         ? $scope.remoteFileName
         : $scope.localFileName
+      $scope.panelSide = panel
       clearFilePickerSelection()
     }
 
@@ -544,6 +546,28 @@ document.addEventListener('DOMContentLoaded', () => {
       $('#loadSaveModal').modal('hide')
 
       // @todo flash message?
+    }
+
+    $scope.loadFile = () => {
+      if ($scope.fileName === '') {
+        // filename empty; don't do anything
+        return
+      }
+
+      switch ($scope.panelSide) {
+        case 'local':
+          refreshLocalFiles()
+          if ($scope.localFiles.includes($scope.fileName)) {
+            codeMirror.setValue(localStorage.getItem(`zedide-${$scope.fileName}`))
+            $('#loadSaveModal').modal('hide')
+            break
+          }
+          console.info(`weird - tried to load a non-existent local file: 'zedide-${$scope.fileName}'`)
+          break
+
+        case 'remote':
+          break
+      }
     }
   }])
 })
