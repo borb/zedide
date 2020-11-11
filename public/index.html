@@ -295,7 +295,7 @@
 								<div class="col-6">
 									<label for="remoteFileList">Remote files:</label>
 									<select class="form-control custom-select" id="remoteFileList" size="15" ng-model="remoteFileName" ng-change="pickFilename('remote')">
-										<option value="{{ file }}" ng-repeat="(idx, file) in ['file1', 'file2', 'file3', 'file4', 'file5', 'file6', 'file7', 'file8', 'file9', 'file0']">{{ file }}</option>
+										<option value="{{ file }}" ng-repeat="file in remoteFiles">{{ file }}</option>
 									</select>
 
 								</div>
@@ -314,7 +314,7 @@
 									<div class="container-fluid" id="saveButtons">
 										<div class="form-row">
 											<div class="col-6"></div>
-											<div class="col-2"><button class="form-control btn btn-outline-primary" ng-click="saveRemoteFile()" id="saveRemoteButton" disabled>Save Remote</button></div>
+											<div class="col-2"><button class="form-control btn btn-outline-primary" ng-click="saveRemoteFile()" id="saveRemoteButton">Save Remote</button></div>
 											<div class="col-2"><button class="form-control btn btn-outline-success" ng-click="saveLocalFile()" id="saveLocalButton">Save Local</button></div>
 											<div class="col-2"><button class="form-control btn btn-outline-danger" data-dismiss="modal" id="saveCancelButton">Cancel</button></div>
 										</div>

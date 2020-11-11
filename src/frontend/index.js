@@ -161,6 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
       $('#navbarLoginItem').addClass('menu-off')
       $('#navbarLogoutItem').removeClass('menu-off')
       $('#authuserDisplay').removeClass('menu-off')
+
+      // enable remote save aspects
+      $scope.remoteFiles = []
+      $('#saveRemoteButton').prop('disabled', false)
+      $('#remoteFileList').prop('disabled', false)
     }
 
     // ...and switchToLogin enables the login/signup menu, turns off logout and username display
@@ -168,6 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
       $('#navbarLoginItem').removeClass('menu-off')
       $('#navbarLogoutItem').addClass('menu-off')
       $('#authuserDisplay').addClass('menu-off')
+
+      // disable remote save aspects
+      $('#saveRemoteButton').prop('disabled', true)
+      $('#remoteFileList').prop('disabled', true)
     }
 
     // check if the user is authorised and adjust the login/logout/signup navbar items
