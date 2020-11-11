@@ -73,6 +73,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }])
 
   /**
+   * upper-case the first letter of a string passed to us
+   *
+   * @param string  input String to work on
+   * @return string
+   */
+  app.filter('ucfirst', [() => (input) => {
+    if (input.length > 1)
+      return `${input[0].toUpperCase()}${input.slice(1)}`
+
+    return input.toUpperCase()
+  }])
+
+  /**
    * application controller for the index page.
    */
   app.controller('ideController', ['$scope', '$http', ($scope, $http) => {
@@ -115,6 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // authorised user
     $scope.authorisedUser = undefined
+
+    // pertaining to load/save actions
+    $scope.pickerMode = ''
+    $scope.localFileName = $scope.remoteFileName = $scope.fileName = ''
+    $scope.localFiles = []
+    $scope.remoteFiles = []
 
     // setup the in-page editor, and the dirty buffer marker
     const textArea = document.getElementById('code-editor')
@@ -458,9 +477,73 @@ document.addEventListener('DOMContentLoaded', () => {
         (res) => {
           // logout succeeded
           switchToLogin()
+          $scope.authorisedUser = ''
         },
         () => $('#logoutFailureModal').modal('show')
       )
+    }
+
+    const clearFilePickerSelection = () => {
+      $('#remoteFileList > option').prop('selected', false)
+      $('#localFileList > option').prop('selected', false)
+    }
+
+    const refreshLocalFiles = () => {
+      $scope.localFiles = localStorage.getItem('zedideFiles') === null
+          ? []
+          : JSON.parse(localStorage.getItem('zedideFiles'))
+
+      $scope.localFiles.forEach(
+        (e, i) => $scope.localFiles[i] = $scope.localFiles[i].replace(/^zedide-/, '')
+      )
+    }
+
+    $scope.save = () => {
+      refreshLocalFiles()
+
+      $('#loadButtons').addClass('file-buttons-hidden')
+      $('#saveButtons').removeClass('file-buttons-hidden')
+      $('#loadSaveModal').modal('show')
+      $scope.pickerMode = 'save'
+      clearFilePickerSelection()
+    }
+
+    $scope.load = () => {
+      refreshLocalFiles()
+
+      $('#loadButtons').removeClass('file-buttons-hidden')
+      $('#saveButtons').addClass('file-buttons-hidden')
+      $('#loadSaveModal').modal('show')
+      $scope.pickerMode = 'load'
+      clearFilePickerSelection()
+    }
+
+    $scope.pickFilename = (panel) => {
+      $scope.fileName = panel == 'remote'
+        ? $scope.remoteFileName
+        : $scope.localFileName
+      clearFilePickerSelection()
+    }
+
+    $scope.saveLocalFile = () => {
+      if ($scope.fileName === '') {
+        // don't save; filename is empty
+        return
+      }
+
+      let files = localStorage.getItem('zedideFiles') === null
+        ? []
+        : JSON.parse(localStorage.getItem('zedideFiles'))
+
+      if (!files.includes(`zedide-${$scope.fileName}`)) {
+        files.push(`zedide-${$scope.fileName}`)
+        localStorage.setItem('zedideFiles', JSON.stringify(files))
+      }
+
+      localStorage.setItem(`zedide-${$scope.fileName}`, codeMirror.getValue())
+      $('#loadSaveModal').modal('hide')
+
+      // @todo flash message?
     }
   }])
 })

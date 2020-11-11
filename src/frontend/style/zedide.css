@@ -61,3 +61,7 @@ div.login-menu {
 li.menu-off {
     display: none;
 }
+
+div.file-buttons-hidden {
+    display: none;
+}

@@ -16,7 +16,7 @@
 			<div class="collapse navbar-collapse" id="menu">
 				<ul class="navbar-nav">
 					<li class="nav-item">
-						<a class="nav-link" href="#">Load</a>
+						<a class="nav-link" href="#" ng-click="load()">Load</a>
 					</li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="exampleMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -67,7 +67,7 @@
 				</ul>
 				&nbsp;
 				<button class="form-control btn btn-outline-primary mr-sm-2" id="assemble" ng-click="assemble()">Assemble</button>
-				<button class="form-control btn btn-outline-info my-2 my-sm-0" id="save" ng-click="save()" disabled>Save</button>
+				<button class="form-control btn btn-outline-info my-2 my-sm-0" id="save" ng-click="save()">Save</button>
 			</form>
 		</nav>
 
@@ -264,6 +264,71 @@
 					<div class="modal-body">
 						<div class="container">
 							<div class="row">Sorry, logout failed: Please check your connection and try again.</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- load/save modal -->
+		<div class="modal fade" id="loadSaveModal" tabindex="-1" role="dialog" aria-labelledby="loadSaveModalHeader" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="loadSaveModalHeader">{{ pickerMode | ucfirst }} program</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+
+					<div class="modal-body">
+						<div class="container">
+							<div class="row">
+								<div class="col-12">
+									<div class="form-group">
+										<label for="filename">Filename:</label>
+										<input type="text" placeholder="myprogram.z80" name="filename" class="form-control" ng-model="fileName" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-6">
+									<label for="remoteFileList">Remote files:</label>
+									<select class="form-control custom-select" id="remoteFileList" size="15" ng-model="remoteFileName" ng-change="pickFilename('remote')">
+										<option value="{{ file }}" ng-repeat="(idx, file) in ['file1', 'file2', 'file3', 'file4', 'file5', 'file6', 'file7', 'file8', 'file9', 'file0']">{{ file }}</option>
+									</select>
+
+								</div>
+								<div class="col-6">
+									<label for="localFileList">Browser-local files:</label>
+									<select class="form-control custom-select" id="localFileList" size="15" ng-model="localFileName" ng-change="pickFilename('local')">
+										<option value="{{ file }}" ng-repeat="file in localFiles">{{ file }}</option>
+									</select>
+								</div>
+							</div>
+
+							<hr/>
+
+							<div class="row">
+								<div class="col-12">
+									<div class="container-fluid" id="saveButtons">
+										<div class="form-row">
+											<div class="col-6"></div>
+											<div class="col-2"><button class="form-control btn btn-outline-primary" ng-click="saveRemoteFile()" id="saveRemoteButton" disabled>Save Remote</button></div>
+											<div class="col-2"><button class="form-control btn btn-outline-success" ng-click="saveLocalFile()" id="saveLocalButton">Save Local</button></div>
+											<div class="col-2"><button class="form-control btn btn-outline-danger" data-dismiss="modal" id="saveCancelButton">Cancel</button></div>
+										</div>
+									</div>
+
+									<div class="container-fluid" id="loadButtons">
+										<div class="form-row">
+											<div class="col-8"></div>
+											<div class="col-2"><button class="form-control btn btn-outline-success" id="loadLocalButton">Load File</button></div>
+											<div class="col-2"><button class="form-control btn btn-outline-danger" data-dismiss="modal" id="loadCancelButton">Cancel</button></div>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
