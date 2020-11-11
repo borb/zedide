@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         (res) => {
           // logout succeeded
           switchToLogin()
-          $scope.authorisedUser = ''
+          $scope.authorisedUser = undefined
         },
         () => $('#logoutFailureModal').modal('show')
       )
@@ -508,8 +508,26 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    const refreshRemoteFiles = () => {
+      // check if we're logged in before trying this
+      if (typeof $scope.authorisedUser === 'undefined' || $scope.authorisedUser == '')
+        return
+
+      $http.get('/api/v1/code').then(
+        (res) => {
+          if (res.data.success)
+            $scope.remoteFiles = res.data.fileList
+        },
+        () => {
+          // there was an error behind the scenes
+          console.error('failed to fetch remote file list; check network panel')
+        }
+      )
+    }
+
     $scope.save = () => {
       refreshLocalFiles()
+      refreshRemoteFiles()
 
       $('#loadButtons').addClass('file-buttons-hidden')
       $('#saveButtons').removeClass('file-buttons-hidden')
@@ -520,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $scope.load = () => {
       refreshLocalFiles()
+      refreshRemoteFiles()
 
       $('#loadButtons').removeClass('file-buttons-hidden')
       $('#saveButtons').addClass('file-buttons-hidden')
@@ -557,6 +576,24 @@ document.addEventListener('DOMContentLoaded', () => {
       // @todo flash message?
     }
 
+    $scope.saveRemoteFile = () => {
+      if ($scope.fileName === '') {
+        // don't save; filename is empty
+        return
+      }
+
+      $http.post('/api/v1/code/save', {fileName: $scope.fileName, code: codeMirror.getValue()}).then(
+        (res) => {
+          // save succeeded
+          if (res.data.success)
+            $('#loadSaveModal').modal('hide')
+        },
+        () => {
+          console.error('api save call failed: check network request for more information')
+        }
+      )
+    }
+
     $scope.loadFile = () => {
       if ($scope.fileName === '') {
         // filename empty; don't do anything
@@ -575,6 +612,20 @@ document.addEventListener('DOMContentLoaded', () => {
           break
 
         case 'remote':
+          $http.post('/api/v1/code/load', {fileName: $scope.fileName}).then(
+            (res) => {
+              // we have the file
+              if (res.data.success) {
+                $('#loadSaveModal').modal('hide')
+                return codeMirror.setValue(res.data.code)
+              }
+              console.error('strange: successful api call response (200) but success flag not set; check network request')
+            },
+            () => {
+              // we have an error
+              console.error('failed to load file: check network request')
+            }
+          )
           break
       }
     }
