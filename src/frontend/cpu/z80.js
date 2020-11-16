@@ -6160,8 +6160,11 @@ class ProcessorZ80
    * @param array   callchain   The callchain to convert into a hex string
    * @return string
    */
-  callChainToHex(callchain = [])
+  callChainToHex(callchain)
   {
+    if (typeof callchain === 'undefined')
+      callchain = this.#preparedInstruction.instruction
+
     return callchain.reduce((p, c, i) => p = p + c.toString(16).toUpperCase(), '0x')
   }
 
