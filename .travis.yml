@@ -11,3 +11,4 @@ before_script:
 script:
   - npm run build:dev
   - npm run build
+  - npm run test
