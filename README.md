@@ -1,7 +1,5 @@
 # zedide
 
-**Note: this project is not accepting any contributions as it constitutes a piece of academic work.**
-
 [![Build Status](https://travis-ci.com/borb/zedide.svg?branch=master)](https://travis-ci.com/borb/zedide)
 
 ## Introduction
@@ -33,10 +31,6 @@ JavaScript * CSS libraries:
   * [mongoose](https://github.com/mongodb/node-mongodb-native)
 
 Were also used, and though they are not directly mentioned, their dependencies without which they would not work. And not forgetting the amazing [node.js](https://nodejs.org/) and [MongoDB](https://www.mongodb.com/). My most heartfelt thanks for everyone's hard work.
-
-## License
-
-Please read [the license](LICENSE.md) for more details: `zedide` is licensed under the Creative Commons CC-BY-SA 4.0 license.
 
 ## Author
 
