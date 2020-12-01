@@ -434,6 +434,11 @@ document.addEventListener('DOMContentLoaded', () => {
       update()
     }
 
+    /**
+     * execute the api call which triggers account generation
+     *
+     * @return undefined
+     */
     $scope.signup = () => {
       if ($scope.loginModel.user == '' || $scope.loginModel.password == '') {
         $('#signupFailureModal').modal('show')
@@ -458,6 +463,11 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    /**
+     * execute the api call which logs a user into their account
+     *
+     * @return undefined
+     */
     $scope.login = () => {
       if ($scope.loginModel.user == '' || $scope.loginModel.password == '') {
         $('#loginFailureModal').modal('show')
@@ -482,6 +492,11 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    /**
+     * execute the api call which logs a user out of their account
+     *
+     * @return undefined
+     */
     $scope.logout = () => {
       $http.get('/api/v1/auth/logout').then(
         (res) => {
@@ -493,11 +508,17 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    /**
+     * clear the picked files from the selection modal dialog
+     */
     const clearFilePickerSelection = () => {
       $('#remoteFileList > option').prop('selected', false)
       $('#localFileList > option').prop('selected', false)
     }
 
+    /**
+     * repopulate the array containing files stored in browser local storage
+     */
     const refreshLocalFiles = () => {
       $scope.localFiles = localStorage.getItem('zedideFiles') === null
           ? []
@@ -508,6 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    /**
+     * repopulate the array containing files stored in server-side storage
+     */
     const refreshRemoteFiles = () => {
       // check if we're logged in before trying this
       if (typeof $scope.authorisedUser === 'undefined' || $scope.authorisedUser == '')
@@ -525,6 +549,11 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    /**
+     * open the modal for saving a file
+     *
+     * @return undefined
+     */
     $scope.save = () => {
       refreshLocalFiles()
       refreshRemoteFiles()
@@ -536,6 +565,11 @@ document.addEventListener('DOMContentLoaded', () => {
       clearFilePickerSelection()
     }
 
+    /**
+     * open the modal for loading a file
+     *
+     * @return undefined
+     */
     $scope.load = () => {
       refreshLocalFiles()
       refreshRemoteFiles()
@@ -547,6 +581,11 @@ document.addEventListener('DOMContentLoaded', () => {
       clearFilePickerSelection()
     }
 
+    /**
+     * this function is bound to the action where a user selects a file in the load/save modal
+     *
+     * @return undefined
+     */
     $scope.pickFilename = (panel) => {
       $scope.fileName = panel == 'remote'
         ? $scope.remoteFileName
@@ -555,6 +594,11 @@ document.addEventListener('DOMContentLoaded', () => {
       clearFilePickerSelection()
     }
 
+    /**
+     * save a file to local storage
+     *
+     * @return undefined
+     */
     $scope.saveLocalFile = () => {
       if ($scope.fileName === '') {
         // don't save; filename is empty
@@ -576,6 +620,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // @todo flash message?
     }
 
+    /**
+     * call the api service to save a file to the user's remote storage
+     *
+     * @return undefined
+     */
     $scope.saveRemoteFile = () => {
       if ($scope.fileName === '') {
         // don't save; filename is empty
@@ -594,6 +643,11 @@ document.addEventListener('DOMContentLoaded', () => {
       )
     }
 
+    /**
+     * load a file from local storage or via the server api
+     *
+     * @return undefined
+     */
     $scope.loadFile = () => {
       if ($scope.fileName === '') {
         // filename empty; don't do anything

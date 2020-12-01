@@ -1,6 +1,7 @@
 # errata for ed-shifted opcodes
 # fuse misses these, but multiple asms i have all generate these codes.
 # these are in ADDITION to the same instructions in opcode_ed (actually, some in that file are undefined opcodes)
+# author: rob andrews <rob@aphlor.org>
 
 0x46 IM 0
 0x66 IM 0

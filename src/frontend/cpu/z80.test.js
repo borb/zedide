@@ -1,3 +1,9 @@
+/**
+ * tests for the ProcessorZ80 class
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 import z80 from './z80.js'
 
 const haltException = 'cpu halted by opcode'

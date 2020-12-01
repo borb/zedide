@@ -3,7 +3,7 @@
 /**
  * express application launcher
  *
- * authored by the express-cli team
+ * authored by the express-cli team; this is boilerplate code created as /bin/www typically, part of the express skeleton.
  * ported to es6+esm by rob andrews <rob@aphlor.org>
  */
 
@@ -17,7 +17,7 @@ const debug = debugjs('zedide:server')
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(process.env.PORT || '3000')
+const port = normalisePort(process.env.PORT || '3000')
 app.set('port', port)
 
 /**
@@ -37,8 +37,7 @@ server.on('listening', onListening)
 /**
  * Normalize a port into a number, string, or false.
  */
-
-function normalizePort(val) {
+function normalisePort(val) {
   const port = parseInt(val, 10)
 
   if (isNaN(port)) {
@@ -57,15 +56,14 @@ function normalizePort(val) {
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error
   }
 
   const bind = typeof port === 'string'
-                 ? 'Pipe ' + port
-                 : 'Port ' + port
+    ? 'Pipe ' + port
+    : 'Port ' + port
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -85,11 +83,10 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
   const addr = server.address()
   const bind = typeof addr === 'string'
-                 ? 'pipe ' + addr
-                 : 'port ' + addr.port
+    ? 'pipe ' + addr
+    : 'port ' + addr.port
   debug('Listening on ' + bind)
 }

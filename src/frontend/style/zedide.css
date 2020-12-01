@@ -1,3 +1,9 @@
+/**
+ * zedide additional styles (for those not obtained from bootstrap or codemirror).
+ *
+ * rob andrews <rob@aphlor.org>
+ */
+
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 
 html, body {

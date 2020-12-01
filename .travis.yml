@@ -1,3 +1,6 @@
+# continuous integration setup file
+# rob andrews <rob@aphlor.org>
+
 language: node_js
 
 node_js:

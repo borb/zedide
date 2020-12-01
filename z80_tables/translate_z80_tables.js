@@ -11,7 +11,7 @@ import fs from 'fs'
 import path from 'path'
 
 /**
- * a hacky script to turn Philip Kendall's opcode tables into javascript source.
+ * a script to turn Philip Kendall's opcode tables into javascript source.
  * brace yourself.
  */
 const [infile, outfile, base, register] = [process.argv[2], process.argv[3], process.argv[4], process.argv[5]]

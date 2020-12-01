@@ -1,2 +1,3 @@
 #!/bin/sh
+# stub to defer calling to /bin/www.js
 "$(dirname $0)/www.js"
