@@ -545,15 +545,23 @@ splitInput.forEach((line) => {
     case 'jp':
       // call: call a subroutine (put pc on the stack so we can use ret)
       // jp: jump to another program location (change the pc to new location)
-      const pushReturnAddress = (mnemonic == 'call')
+      let pushReturnAddress = (mnemonic == 'call')
         ? '  this.#pushWord(this.#registers.pc)\n'
         : ''
 
       if (param == 'nnnn') {
         // unconditional
-        outputBuffer += `// ${verbatimOp}\nthis.#opcodes${subtablePrefix}[${opcode}] = () => {\n  const [lo, hi] = [this.#getPC(), this.#getPC()]\n  this.#registers.pc = this.#word(hi, lo)\n${pushReturnAddress}}\n`
+        outputBuffer += `// ${verbatimOp}\n` +
+          `this.#opcodes${subtablePrefix}[${opcode}] = () => {\n` +
+          `  const [lo, hi] = [this.#getPC(), this.#getPC()]\n` + pushReturnAddress +
+          `  this.#registers.pc = this.#word(hi, lo)\n` +
+          `}\n`
         break
       }
+
+      // bump indentation an extra level on the return address push if it's a conditional call
+      if (mnemonic == 'call')
+        pushReturnAddress = `  ${pushReturnAddress}`
 
       if (mnemonic == 'jp' && param.match(/(hl|ix|iy)/)) {
         // unconditional using register value (jp only)
@@ -575,26 +583,27 @@ splitInput.forEach((line) => {
       switch (flagOp) {
         case 'z':
         case 'c':
-          outputBuffer += `if (this.#regops.f() & this.#FREG_${flagOp.toUpperCase()})`
+          outputBuffer += `if (this.#regops.f() & this.#FREG_${flagOp.toUpperCase()}) {`
           break
         case 'nz':
         case 'nc':
-          outputBuffer += `if (!(this.#regops.f() & this.#FREG_${flagOp[1].toUpperCase()}))`
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_${flagOp[1].toUpperCase()})) {`
           break
         case 'pe':
-          outputBuffer += `if (this.#regops.f() & this.#FREG_P)`
+          outputBuffer += `if (this.#regops.f() & this.#FREG_P) {`
           break
         case 'po':
-          outputBuffer += `if (!(this.#regops.f() & this.#FREG_P))`
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_P)) {`
           break
         case 'p':
-          outputBuffer += `if (!(this.#regops.f() & this.#FREG_S))`
+          outputBuffer += `if (!(this.#regops.f() & this.#FREG_S)) {`
           break
         case 'm':
-          outputBuffer += `if (this.#regops.f() & this.#FREG_S)`
+          outputBuffer += `if (this.#regops.f() & this.#FREG_S) {`
           break
       }
-      outputBuffer += `\n    this.#regops.pc(this.#word(hi, lo))\n${pushReturnAddress}}\n`
+      outputBuffer += `\n${pushReturnAddress}    this.#regops.pc(this.#word(hi, lo))\n  }\n`
+      outputBuffer += `}\n`
       break
 
     case 'scf':

@@ -20,7 +20,7 @@
     "opcodes:ddcb": "z80_tables/translate_z80_tables.js z80_tables/opcodes_ddfdcb.dat z80_tables/build/06_opcodes_ddcb.js ddcb ix",
     "opcodes:fdcb": "z80_tables/translate_z80_tables.js z80_tables/opcodes_ddfdcb.dat z80_tables/build/07_opcodes_fdcb.js fdcb iy",
     "opcodes:combine": "ls z80_tables/build/[0-9]* | sort | xargs cat > z80_tables/build/opcodes.js",
-    "opcodes:splice": "z80_tables/inject_file.js src/frontend/cpu/z80.js z80_tables/build/opcodes.js '// START: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*' '// END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*'",
+    "opcodes:splice": "sed -i.unindented.js 's/^/    /g;s/^ *$//g' z80_tables/build/opcodes.js && z80_tables/inject_file.js src/frontend/cpu/z80.js z80_tables/build/opcodes.js '// START: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*' '// END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

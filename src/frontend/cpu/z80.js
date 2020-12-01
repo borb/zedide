@@ -1229,8 +1229,9 @@ class ProcessorZ80
     // jp nz,nnnn
     this.#opcodes[0xc2] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_Z))
+      if (!(this.#regops.f() & this.#FREG_Z)) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // jp nnnn
     this.#opcodes[0xc3] = () => {
@@ -1240,9 +1241,10 @@ class ProcessorZ80
     // call nz,nnnn
     this.#opcodes[0xc4] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_Z))
+      if (!(this.#regops.f() & this.#FREG_Z)) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // push bc
     this.#opcodes[0xc5] = () => { this.#pushWord(this.#registers.bc) }
@@ -1265,23 +1267,25 @@ class ProcessorZ80
     // jp z,nnnn
     this.#opcodes[0xca] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_Z)
+      if (this.#regops.f() & this.#FREG_Z) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // shift cb (subtable of operations)
     this.#opcodes[0xcb] = []
     // call z,nnnn
     this.#opcodes[0xcc] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_Z)
+      if (this.#regops.f() & this.#FREG_Z) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // call nnnn
     this.#opcodes[0xcd] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      this.#registers.pc = this.#word(hi, lo)
       this.#pushWord(this.#registers.pc)
+      this.#registers.pc = this.#word(hi, lo)
     }
     // adc a,nn
     this.#opcodes[0xce] = () => {
@@ -1303,8 +1307,9 @@ class ProcessorZ80
     // jp nc,nnnn
     this.#opcodes[0xd2] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_C))
+      if (!(this.#regops.f() & this.#FREG_C)) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // out (nn),a
     this.#opcodes[0xd3] = () => {
@@ -1313,9 +1318,10 @@ class ProcessorZ80
     // call nc,nnnn
     this.#opcodes[0xd4] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_C))
+      if (!(this.#regops.f() & this.#FREG_C)) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // push de
     this.#opcodes[0xd5] = () => { this.#pushWord(this.#registers.de) }
@@ -1346,8 +1352,9 @@ class ProcessorZ80
     // jp c,nnnn
     this.#opcodes[0xda] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_C)
+      if (this.#regops.f() & this.#FREG_C) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // in a,(nn)
     this.#opcodes[0xdb] = () => {
@@ -1356,9 +1363,10 @@ class ProcessorZ80
     // call c,nnnn
     this.#opcodes[0xdc] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_C)
+      if (this.#regops.f() & this.#FREG_C) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // shift dd (subtable of operations)
     this.#opcodes[0xdd] = []
@@ -1382,8 +1390,9 @@ class ProcessorZ80
     // jp po,nnnn
     this.#opcodes[0xe2] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_P))
+      if (!(this.#regops.f() & this.#FREG_P)) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // ex (sp),hl
     this.#opcodes[0xe3] = () => {
@@ -1396,9 +1405,10 @@ class ProcessorZ80
     // call po,nnnn
     this.#opcodes[0xe4] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_P))
+      if (!(this.#regops.f() & this.#FREG_P)) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // push hl
     this.#opcodes[0xe5] = () => { this.#pushWord(this.#registers.hl) }
@@ -1422,8 +1432,9 @@ class ProcessorZ80
     // jp pe,nnnn
     this.#opcodes[0xea] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_P)
+      if (this.#regops.f() & this.#FREG_P) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // ex de,hl
     this.#opcodes[0xeb] = () => {
@@ -1434,9 +1445,10 @@ class ProcessorZ80
     // call pe,nnnn
     this.#opcodes[0xec] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_P)
+      if (this.#regops.f() & this.#FREG_P) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // shift ed (subtable of operations)
     this.#opcodes[0xed] = []
@@ -1460,17 +1472,19 @@ class ProcessorZ80
     // jp p,nnnn
     this.#opcodes[0xf2] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_S))
+      if (!(this.#regops.f() & this.#FREG_S)) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // di
     this.#opcodes[0xf3] = () => { this.#interrupts = false }
     // call p,nnnn
     this.#opcodes[0xf4] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (!(this.#regops.f() & this.#FREG_S))
+      if (!(this.#regops.f() & this.#FREG_S)) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // push af
     this.#opcodes[0xf5] = () => { this.#pushWord(this.#registers.af) }
@@ -1494,17 +1508,19 @@ class ProcessorZ80
     // jp m,nnnn
     this.#opcodes[0xfa] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_S)
+      if (this.#regops.f() & this.#FREG_S) {
         this.#regops.pc(this.#word(hi, lo))
+      }
     }
     // ei
     this.#opcodes[0xfb] = () => { this.#interrupts = true }
     // call m,nnnn
     this.#opcodes[0xfc] = () => {
       const [lo, hi] = [this.#getPC(), this.#getPC()]
-      if (this.#regops.f() & this.#FREG_S)
+      if (this.#regops.f() & this.#FREG_S) {
+        this.#pushWord(this.#registers.pc)
         this.#regops.pc(this.#word(hi, lo))
-      this.#pushWord(this.#registers.pc)
+      }
     }
     // shift fd (subtable of operations)
     this.#opcodes[0xfd] = []
@@ -6094,7 +6110,7 @@ class ProcessorZ80
       const location = this.#regops.iy() + this.#uint8ToInt8(dd)
       this.#regops.a(this.#ram[location] = this.#ram[location] & (1 << 7))
     }
-    // END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*
+// END: this block is AUTOMATICALLY GENERATED SEE /z80_tables/*
   }
 
   // our prepared instruction
