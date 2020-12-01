@@ -2,6 +2,8 @@
 
 **Note: this project is not accepting any contributions as it constitutes a piece of academic work.**
 
+[![Build Status](https://travis-ci.com/borb/zedide.svg?branch=master)](https://travis-ci.com/borb/zedide)
+
 ## Introduction
 
 `zedide` is an in-development Integrated Development Environment (IDE) for writing Z80 assembler. It combines an editor, assembler, simulator and debugger in a single user interface, with server-side and browser-side storage for projects.
