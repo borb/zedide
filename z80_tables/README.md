@@ -6,6 +6,14 @@ The tables have been somewhat modified (removal of slt trap, empty opcodes remov
 
 Fuse is a fantastic ZX Spectrum emulator and is licensed under the GNU General Public License (GPL) version 2. Importantly, these tables retain the same GPLv2 license.
 
+These are the instruction table files:
+
+* `opcodes_base.dat`
+* `opcodes_cb.dat`
+* `opcodes_ddfd.dat`
+* `opcodes_ddfdcb.dat`
+* `opcodes_ed.dat`
+
 Fuse can be found at:
 
 > http://fuse-emulator.sourceforge.net/

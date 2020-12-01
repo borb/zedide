@@ -1,4 +1,6 @@
 # opcodes.base: unshifted Z80 opcodes
+# THIS FILE IS FROM THE FUSE EMULATOR BY PHILIP KENDALL (http://fuse-emulator.sourceforge.net/)
+# LICENSED UNDER THE GNU GENERAL PUBLIC LICENSE VERSION 2
 
 0x00 NOP
 0x01 LD BC,nnnn
