@@ -12,6 +12,24 @@ It is intended as an easy-to-use tool to introduce developers to assembly langua
 
 The Zilog Z80 CPU is a clone of the Intel 8080, which Intel encapsulated as a subset of the 8086 instruction set. The Z80 has notable improvements over the 8080, but the intention is that the smaller subset of instructions is better suited to learning rather than a larger CPU architecture such as x86 or amd64: in essence, it is intended as a foothold in the assembly language arena before moving onto more complex architectures.
 
+## Running
+
+A prebuilt live environment can be found at [https://zedide.herokuapp.com/](https://zedide.herokuapp.com/). However, to run your own server in a production environment, the following process must be followed for the first execution:
+
+```shell
+$ npm install
+$ NODE_ENV=production npm run build
+$ NODE_ENV=production npm run start
+```
+
+To run the server after this, simply run:
+
+```shell
+$ NODE_ENV=production npm run start
+```
+
+Please remember that you must set a `MONGODB_URI` environment variable containing the connection URI of your MongoDB instance (including authentication parameters).
+
 ## Gratitude
 
 `zedide` is based upon several opensource projects and uses a lot of libraries and owes immense gratitude to all of them.
@@ -31,6 +49,20 @@ JavaScript * CSS libraries:
   * [mongoose](https://github.com/mongodb/node-mongodb-native)
 
 Were also used, and though they are not directly mentioned, their dependencies without which they would not work. And not forgetting the amazing [node.js](https://nodejs.org/) and [MongoDB](https://www.mongodb.com/). My most heartfelt thanks for everyone's hard work.
+
+## Making changes to the code
+
+To make changes to the code, you can start the webpack dev server to track frontend changes and nodemon to track the backend API server changes. Start two terminals and run the following:
+
+```shell
+$ npm run start:dev-fe
+```
+
+```shell
+$ npm run start:dev-be
+```
+
+When you make changes to the source files, they are automatically tracked by the servers and any frontend/backend services are restarted.
 
 ## Author
 
