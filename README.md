@@ -68,7 +68,7 @@ When you make changes to the source files, they are automatically tracked by the
 
 ## License
 
-Please read [the license](LICENSE.md) for more details: `zedide` is licensed under the Creative Commons CC-BY-SA 4.0 license.
+Please read [the license](LICENSE.md) for more details: `zedide` is licensed under the Creative Commons CC BY-NC-SA 4.0 license.
 
 ## Author
 
