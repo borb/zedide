@@ -1,5 +1,7 @@
 # zedide
 
+**Note: this project is not accepting any contributions as it constitutes a piece of academic work.**
+
 [![Build Status](https://travis-ci.com/borb/zedide.svg?branch=master)](https://travis-ci.com/borb/zedide)
 
 ## Introduction
@@ -63,6 +65,10 @@ $ npm run start:dev-be
 ```
 
 When you make changes to the source files, they are automatically tracked by the servers and any frontend/backend services are restarted.
+
+## License
+
+Please read [the license](LICENSE.md) for more details: `zedide` is licensed under the Creative Commons CC-BY-SA 4.0 license.
 
 ## Author
 
