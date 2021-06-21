@@ -1,7 +1,5 @@
 # zedide
 
-**Note: this project is not accepting any contributions as it constitutes a piece of academic work.**
-
 [![Build Status](https://travis-ci.com/borb/zedide.svg?branch=master)](https://travis-ci.com/borb/zedide)
 
 ## Introduction
