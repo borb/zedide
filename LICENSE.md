@@ -1,4 +1,4 @@
-`zedide` is Copyright ©2020 Rob Andrews.
+`zedide` is Copyright ©2020-2021 Rob Andrews.
 
 ![Creative Commons License](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)
 
